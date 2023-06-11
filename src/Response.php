@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleOnlineHealthcare\JsonApi;
 
 use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
@@ -9,8 +11,6 @@ use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
 class Response
 {
     /**
-     * @param JsonApi         $jsonApi
-     * @param Links           $links
      * @param Entity|Entity[] $data
      */
     public function __construct(

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleOnlineHealthcare\JsonApi\Concerns;
 
 use SimpleOnlineHealthcare\JsonApi\Contracts\Item;
@@ -10,9 +12,6 @@ class JsonApi implements Item
     {
     }
 
-    /**
-     * @return string
-     */
     public function getVersion(): string
     {
         return $this->version;

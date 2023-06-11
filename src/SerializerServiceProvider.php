@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleOnlineHealthcare\JsonApi;
 
 use Illuminate\Foundation\Application;
@@ -9,13 +11,10 @@ use SimpleOnlineHealthcare\JsonApi\Registries\ConfigurationRegistry;
 
 class SerializerServiceProvider extends ServiceProvider
 {
-    /**
-     * @return void
-     */
     public function boot(): void
     {
         $this->publishes([
-            __DIR__.'/../config/json-api-serializer.php' => config_path('json-api-serializer.php'),
+            __DIR__ . '/../config/json-api-serializer.php' => config_path('json-api-serializer.php'),
         ], 'config');
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleOnlineHealthcare\JsonApi\Factories;
 
 use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
@@ -12,14 +14,11 @@ class ResponseFactory
     {
     }
 
-    public function make(mixed $data, ?Links $links = null): Response
+    public function make(mixed $data, Links $links = null): Response
     {
         return new Response($this->getJsonApi(), $links, $data);
     }
 
-    /**
-     * @return JsonApi
-     */
     public function getJsonApi(): JsonApi
     {
         return $this->jsonApi;

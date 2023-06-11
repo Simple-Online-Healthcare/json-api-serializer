@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
 use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
@@ -8,7 +10,7 @@ use SimpleOnlineHealthcare\JsonApi\Registries\TransformerRegistry;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
- * @method  getSupportedTypes(?string $format)
+ * @method getSupportedTypes(?string $format)
  */
 class EntityNormalizer implements NormalizerInterface
 {
@@ -19,10 +21,7 @@ class EntityNormalizer implements NormalizerInterface
     }
 
     /**
-     * @param Entity      $object
-     * @param string|null $format
-     * @param array       $context
-     * @return array
+     * @param Entity $object
      */
     public function normalize(mixed $object, string $format = null, array $context = []): array
     {
@@ -40,17 +39,11 @@ class EntityNormalizer implements NormalizerInterface
         return $data instanceof Entity;
     }
 
-    /**
-     * @return TransformerRegistry
-     */
     public function getTransformerRegistry(): TransformerRegistry
     {
         return $this->transformerRegistry;
     }
 
-    /**
-     * @return ResourceTypeRegistry
-     */
     public function getResourceTypeRegistry(): ResourceTypeRegistry
     {
         return $this->resourceTypeRegistry;

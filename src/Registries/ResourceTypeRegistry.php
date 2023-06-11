@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleOnlineHealthcare\JsonApi\Registries;
+
+use function is_object;
 
 class ResourceTypeRegistry
 {
@@ -13,13 +17,11 @@ class ResourceTypeRegistry
 
     /**
      * @param object|string $entity
-     *
-     * @return string
      */
     public function findResourceTypeByEntity(mixed $entity): string
     {
         if (is_object($entity)) {
-            $entity = get_class($entity);
+            $entity = $entity::class;
         }
 
         return $this->map[$entity];

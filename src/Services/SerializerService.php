@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleOnlineHealthcare\JsonApi\Services;
 
 use Illuminate\Foundation\Application;
@@ -11,6 +13,9 @@ use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
+
+use const JSON_PRETTY_PRINT;
+use const JSON_UNESCAPED_UNICODE;
 
 class SerializerService
 {
@@ -30,8 +35,6 @@ class SerializerService
 
     /**
      * @param Entity|Entity[] $entity
-     *
-     * @return string
      */
     public function toJsonApi(Entity|array $entity): string
     {
@@ -49,17 +52,11 @@ class SerializerService
         throw new RuntimeException('To be implemented');
     }
 
-    /**
-     * @return Serializer
-     */
     public function getSerializer(): Serializer
     {
         return $this->serializer;
     }
 
-    /**
-     * @return Application
-     */
     public function getApplication(): Application
     {
         return $this->application;

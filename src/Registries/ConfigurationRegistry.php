@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleOnlineHealthcare\JsonApi\Registries;
 
 use Illuminate\Config\Repository;
@@ -29,12 +31,9 @@ class ConfigurationRegistry
     }
 
     /**
-     * @param string|null $key
-     * @param mixed|null  $default
-     *
      * @return array|string|int
      */
-    public function getConfig(?string $key = null, mixed $default = null): mixed
+    public function getConfig(string $key = null, mixed $default = null): mixed
     {
         if (!empty($key)) {
             $parts = explode('.', $key);
