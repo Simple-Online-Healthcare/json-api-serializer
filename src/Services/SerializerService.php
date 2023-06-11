@@ -7,8 +7,8 @@ namespace SimpleOnlineHealthcare\JsonApi\Services;
 use Illuminate\Foundation\Application;
 use RuntimeException;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
+use SimpleOnlineHealthcare\JsonApi\Factories\ResponseFactory;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
-use SimpleOnlineHealthcare\JsonApi\Response;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
@@ -21,8 +21,10 @@ class SerializerService
 {
     protected Serializer $serializer;
 
-    public function __construct(protected Application $application)
-    {
+    public function __construct(
+        protected Application $application,
+        protected ResponseFactory $responseFactory,
+    ) {
         $encoders = [new JsonEncoder()];
 
         $normalizers = [
@@ -38,7 +40,7 @@ class SerializerService
      */
     public function toJsonApi(Entity|array $entity): string
     {
-        $response = Response::make($entity);
+        $response = $this->getResponseFactory()->make($entity);
 
         return $this->getSerializer()->serialize(
             $response,
@@ -60,5 +62,13 @@ class SerializerService
     public function getApplication(): Application
     {
         return $this->application;
+    }
+
+    /**
+     * @return ResponseFactory
+     */
+    public function getResponseFactory(): ResponseFactory
+    {
+        return $this->responseFactory;
     }
 }
