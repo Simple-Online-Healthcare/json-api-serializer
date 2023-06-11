@@ -1,0 +1,29 @@
+{
+  "name": "soh/php-cs-fixer",
+  "type": "tools-directory",
+  "description": "The tools directory.",
+  "keywords": [
+    "php-cs-fixer"
+  ],
+  "license": "MIT",
+  "require": {
+    "php": "^8.2",
+    "simple-online-healthcare/php-coding-standards": "^1.0"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:Simple-Online-Healthcare/php-coding-standards.git"
+    }
+  ],
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
