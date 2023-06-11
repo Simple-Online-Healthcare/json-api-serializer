@@ -12,7 +12,7 @@ class ConfigurationRegistry
 
     public function __construct(Repository $repository)
     {
-        $this->config = $repository->get('json-api-serializer');
+        $this->config = $repository->get('json-api-serializer') ?? [];
     }
 
     public function getJsonApiVersion(): string
