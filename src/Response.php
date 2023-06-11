@@ -14,7 +14,7 @@ class Response
      * @param Entity|Entity[] $data
      */
     public function __construct(
-        protected JsonApi $jsonApi,
+        protected JsonApi $jsonapi,
         protected ?Links $links,
         protected Entity|array $data,
     ) {
