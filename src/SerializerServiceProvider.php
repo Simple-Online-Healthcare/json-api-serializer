@@ -22,15 +22,15 @@ class SerializerServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(JsonApi::class, function () {
-            return new JsonApi(config('jsonapi.version', '1.0'));
+            return new JsonApi(config('json-api-serializer.jsonapi.version', '1.0'));
         });
 
         $this->app->singleton(ResourceTypeRegistry::class, function () {
-            return new ResourceTypeRegistry(config('jsonapi.resource_type_mapping', []));
+            return new ResourceTypeRegistry(config('json-api-serializer.jsonapi.resource_type_mapping', []));
         });
 
         $this->app->singleton(TransformerRegistry::class, function () {
-            return new TransformerRegistry(config('jsonapi.transformer_mapping', []));
+            return new TransformerRegistry(config('json-api-serializer.jsonapi.transformer_mapping', []));
         });
     }
 }

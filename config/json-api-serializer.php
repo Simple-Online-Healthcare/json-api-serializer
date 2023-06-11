@@ -10,7 +10,7 @@ return [
         ],
 
         'transformer_mapping' => [
-            // Entity::class => EntityTransformer::class,
+            App\Entities\DmdVersion::class => App\JsonApi\Transformers\DmdVersionTransformer::class,
         ],
     ],
 
