@@ -1,16 +1,15 @@
 <img width="100%" src="assets/readme-header.svg">
 
-<h1 align="center">laravel-doctrine-fixtures</h1>
+<h1 align="center">json-api-serializer</h1>
 
 # Introduction
 
-This package adds support for Doctrine Fixtures within Laravel v9.32. This package had to be created due to the way
-autoloading works via Composer works.
+This package allows for easy serialization of Doctrine entities to JSON:API.
 
 # Installation
 
 1. Add the repository to your `composer.json`
-   - `composer config repositories.simpleonlinehealthcare/laravel-doctrine-fixtures vcs https://github.com/Simple-Online-Healthcare/laravel-doctrine-fixtures`
+    - `composer config repositories.simpleonlinehealthcare/json-api-serializer vcs https://github.com/Simple-Online-Healthcare/json-api-serializer`
 2. Require the package within your application
-   - `composer require simpleonlinehealthcare/php-coding-standards`
+    - `composer require simpleonlinehealthcare/json-api-serializer`
 3. Laravel should auto-discover the package.

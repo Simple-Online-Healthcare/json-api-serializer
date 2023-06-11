@@ -1,6 +1,6 @@
 {
   "name": "simpleonlinehealthcare/json-api-serializer",
-  "description": "JSON:API serializer for Laravel 9.x",
+  "description": "Serialise Doctrine entities to JSON:API for Laravel 9.x",
   "type": "library",
   "license": "proprietary",
   "authors": [

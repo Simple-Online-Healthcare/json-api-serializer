@@ -1,6 +1,6 @@
 <?php
 
-namespace SimpleOnlineHealthcare\Doctrine;
+namespace SimpleOnlineHealthcare\JsonApi;
 
 use Illuminate\Support\ServiceProvider;
 
