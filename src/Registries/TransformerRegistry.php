@@ -10,11 +10,8 @@ use function is_object;
 
 class TransformerRegistry
 {
-    protected array $map;
-
-    public function __construct(ConfigurationRegistry $configurationRegistry)
+    public function __construct(protected array $map)
     {
-        $this->map = $configurationRegistry->getTransformerEntityMap();
     }
 
     /**
