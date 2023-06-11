@@ -11,6 +11,7 @@ use SimpleOnlineHealthcare\JsonApi\Factories\ResponseFactory;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
@@ -45,7 +46,10 @@ class SerializerService
         return $this->getSerializer()->serialize(
             $response,
             JsonEncoder::FORMAT,
-            [JsonEncode::OPTIONS => JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT]
+            [
+                JsonEncode::OPTIONS => JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT,
+                AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+            ]
         );
     }
 
