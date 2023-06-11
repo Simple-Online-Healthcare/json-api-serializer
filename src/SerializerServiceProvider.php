@@ -6,7 +6,6 @@ namespace SimpleOnlineHealthcare\JsonApi;
 
 use Illuminate\Support\ServiceProvider;
 use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
-use SimpleOnlineHealthcare\JsonApi\Registries\ConfigurationRegistry;
 use SimpleOnlineHealthcare\JsonApi\Registries\ResourceTypeRegistry;
 use SimpleOnlineHealthcare\JsonApi\Registries\TransformerRegistry;
 

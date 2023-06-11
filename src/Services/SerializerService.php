@@ -6,6 +6,7 @@ namespace SimpleOnlineHealthcare\JsonApi\Services;
 
 use Illuminate\Foundation\Application;
 use RuntimeException;
+use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
 use SimpleOnlineHealthcare\JsonApi\Factories\ResponseFactory;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
@@ -39,9 +40,9 @@ class SerializerService
     /**
      * @param Entity|Entity[] $entity
      */
-    public function toJsonApi(Entity|array $entity): string
+    public function toJsonApi(Entity|array $entity, ?Links $links = null): string
     {
-        $response = $this->getResponseFactory()->make($entity);
+        $response = $this->getResponseFactory()->make($entity, $links);
 
         return $this->getSerializer()->serialize(
             $response,
