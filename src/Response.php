@@ -2,9 +2,9 @@
 
 namespace SimpleOnlineHealthcare\JsonApi;
 
-use App\Contracts\Entity;
 use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
+use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
 
 class Response
 {
@@ -18,10 +18,5 @@ class Response
         protected Links $links,
         protected Entity|array $data,
     ) {
-    }
-
-    public static function make(mixed $data): Response
-    {
-        return new self(new JsonApi(), new Links(), $data);
     }
 }

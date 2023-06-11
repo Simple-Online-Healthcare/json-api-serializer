@@ -6,7 +6,9 @@ use SimpleOnlineHealthcare\JsonApi\Contracts\Item;
 
 class JsonApi implements Item
 {
-    protected string $version = '1.0';
+    public function __construct(protected string $version)
+    {
+    }
 
     /**
      * @return string
@@ -14,16 +16,5 @@ class JsonApi implements Item
     public function getVersion(): string
     {
         return $this->version;
-    }
-
-    /**
-     * @param string $version
-     * @return JsonApi
-     */
-    public function setVersion(string $version): JsonApi
-    {
-        $this->version = $version;
-
-        return $this;
     }
 }

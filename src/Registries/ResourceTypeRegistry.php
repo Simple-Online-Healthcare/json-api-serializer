@@ -2,9 +2,7 @@
 
 namespace SimpleOnlineHealthcare\JsonApi\Registries;
 
-use SimpleOnlineHealthcare\JsonApi\Contracts\Transformer;
-
-class TransformerRegistry
+class ResourceTypeRegistry
 {
     protected array $map;
 
@@ -16,14 +14,14 @@ class TransformerRegistry
     /**
      * @param object|string $entity
      *
-     * @return Transformer
+     * @return string
      */
-    public function findTransformerByEntity(mixed $entity): Transformer
+    public function findResourceTypeByEntity(mixed $entity): string
     {
         if (is_object($entity)) {
             $entity = get_class($entity);
         }
 
-        return new $this->map[$entity]();
+        return $this->map[$entity];
     }
 }

@@ -6,24 +6,15 @@ use SimpleOnlineHealthcare\JsonApi\Contracts\Item;
 
 class Links implements Item
 {
-    protected string $self;
-
-    /**
-     * @return string
-     */
-    public function getSelf(): string
+    public function __construct(protected ?string $self = null)
     {
-        return $this->self;
     }
 
     /**
-     * @param string $self
-     * @return Links
+     * @return string|null
      */
-    public function setSelf(string $self): Links
+    public function getSelf(): ?string
     {
-        $this->self = $self;
-
-        return $this;
+        return $this->self;
     }
 }
