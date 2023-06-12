@@ -8,7 +8,7 @@ use Illuminate\Foundation\Application;
 use RuntimeException;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
-use SimpleOnlineHealthcare\JsonApi\Factories\ResponseFactory;
+use SimpleOnlineHealthcare\JsonApi\Factories\JsonApiSpecFactory;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -25,7 +25,7 @@ class Serializer
 
     public function __construct(
         protected Application $application,
-        protected ResponseFactory $responseFactory,
+        protected JsonApiSpecFactory $jsonApiSpecFactory,
     ) {
         $encoders = [new JsonEncoder()];
 
@@ -42,7 +42,7 @@ class Serializer
      */
     public function toJsonApi(Entity|array $entity, ?Links $links = null): string
     {
-        $response = $this->getResponseFactory()->make($entity, $links);
+        $response = $this->getJsonApiSpecFactory()->make($entity, $links);
 
         return $this->getSerializer()->serialize(
             $response,
@@ -70,10 +70,10 @@ class Serializer
     }
 
     /**
-     * @return ResponseFactory
+     * @return JsonApiSpecFactory
      */
-    protected function getResponseFactory(): ResponseFactory
+    protected function getJsonApiSpecFactory(): JsonApiSpecFactory
     {
-        return $this->responseFactory;
+        return $this->jsonApiSpecFactory;
     }
 }

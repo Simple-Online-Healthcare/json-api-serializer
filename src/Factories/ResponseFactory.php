@@ -4,23 +4,33 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi\Factories;
 
-use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
-use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
-use SimpleOnlineHealthcare\JsonApi\JsonApiSpec;
+use Illuminate\Http\JsonResponse;
+use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
+use SimpleOnlineHealthcare\JsonApi\Services\Serializer;
 
 class ResponseFactory
 {
-    public function __construct(protected JsonApi $jsonApi)
+    public function __construct(protected Serializer $serializer)
     {
     }
 
-    public function make(mixed $data, Links $links = null): JsonApiSpec
+    /**
+     * @param Entity|Entity[] $entities
+     *
+     * @return JsonResponse
+     */
+    public function make(mixed $entities): JsonResponse
     {
-        return new JsonApiSpec($this->getJsonApi(), $links, $data);
+        $data = $this->getSerializer()->toJsonApi($entities);
+
+        return new JsonResponse($data);
     }
 
-    public function getJsonApi(): JsonApi
+    /**
+     * @return Serializer
+     */
+    public function getSerializer(): Serializer
     {
-        return $this->jsonApi;
+        return $this->serializer;
     }
 }
