@@ -23,7 +23,7 @@ class ResponseFactory
     {
         $data = $this->getSerializer()->toJsonApi($entities);
 
-        return new JsonResponse($data);
+        return JsonResponse::fromJsonString($data);
     }
 
     /**
