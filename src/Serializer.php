@@ -14,14 +14,14 @@ use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
-use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Serializer as BaseSerializer;
 
 use const JSON_PRETTY_PRINT;
 use const JSON_UNESCAPED_UNICODE;
 
-class SerializerService
+class Serializer
 {
-    protected Serializer $serializer;
+    protected BaseSerializer $serializer;
 
     public function __construct(
         protected Application $application,
@@ -34,7 +34,7 @@ class SerializerService
             new PropertyNormalizer(),
         ];
 
-        $this->serializer = new Serializer($normalizers, $encoders);
+        $this->serializer = new BaseSerializer($normalizers, $encoders);
     }
 
     /**
@@ -59,12 +59,12 @@ class SerializerService
         throw new RuntimeException('To be implemented');
     }
 
-    public function getSerializer(): Serializer
+    protected function getSerializer(): BaseSerializer
     {
         return $this->serializer;
     }
 
-    public function getApplication(): Application
+    protected function getApplication(): Application
     {
         return $this->application;
     }
@@ -72,7 +72,7 @@ class SerializerService
     /**
      * @return ResponseFactory
      */
-    public function getResponseFactory(): ResponseFactory
+    protected function getResponseFactory(): ResponseFactory
     {
         return $this->responseFactory;
     }

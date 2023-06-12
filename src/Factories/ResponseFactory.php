@@ -6,7 +6,7 @@ namespace SimpleOnlineHealthcare\JsonApi\Factories;
 
 use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
-use SimpleOnlineHealthcare\JsonApi\Response;
+use SimpleOnlineHealthcare\JsonApi\JsonApiSpec;
 
 class ResponseFactory
 {
@@ -14,9 +14,9 @@ class ResponseFactory
     {
     }
 
-    public function make(mixed $data, Links $links = null): Response
+    public function make(mixed $data, Links $links = null): JsonApiSpec
     {
-        return new Response($this->getJsonApi(), $links, $data);
+        return new JsonApiSpec($this->getJsonApi(), $links, $data);
     }
 
     public function getJsonApi(): JsonApi

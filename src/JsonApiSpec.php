@@ -8,7 +8,7 @@ use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
 
-class Response
+class JsonApiSpec
 {
     /**
      * @param Entity|Entity[] $data
