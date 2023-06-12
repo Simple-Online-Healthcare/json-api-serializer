@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleOnlineHealthcare\JsonApi\Services;
+namespace SimpleOnlineHealthcare\JsonApi;
 
 use Illuminate\Foundation\Application;
 use RuntimeException;
