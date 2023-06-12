@@ -6,7 +6,7 @@ namespace SimpleOnlineHealthcare\JsonApi\Factories;
 
 use Illuminate\Http\JsonResponse;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
-use SimpleOnlineHealthcare\JsonApi\Services\Serializer;
+use SimpleOnlineHealthcare\JsonApi\Serializer;
 
 class ResponseFactory
 {
