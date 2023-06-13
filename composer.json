@@ -19,8 +19,15 @@
     }
   },
   "require": {
-    "laravel/framework": "^9.19"
+    "laravel/framework": "^9.19",
+    "simple-online-healthcare/contracts": "^1.5.0"
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/Simple-Online-Healthcare/contracts"
+    }
+  ],
   "extra": {
     "laravel": {
       "providers": [

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SimpleOnlineHealthcare\JsonApi\Factories;
 
 use Illuminate\Http\JsonResponse;
-use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
+use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Serializer;
 
 class ResponseFactory

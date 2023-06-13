@@ -7,7 +7,7 @@ namespace SimpleOnlineHealthcare\JsonApi;
 use Illuminate\Foundation\Application;
 use RuntimeException;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
-use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
+use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Factories\JsonApiSpecFactory;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncode;

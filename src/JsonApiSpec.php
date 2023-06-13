@@ -6,7 +6,7 @@ namespace SimpleOnlineHealthcare\JsonApi;
 
 use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
-use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
+use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 
 class JsonApiSpec
 {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
-use SimpleOnlineHealthcare\JsonApi\Contracts\Entity;
+use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Registries\ResourceTypeRegistry;
 use SimpleOnlineHealthcare\JsonApi\Registries\TransformerRegistry;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
