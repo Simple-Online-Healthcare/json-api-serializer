@@ -13,7 +13,7 @@ class ResourceTypeRegistry
     }
 
     /**
-     * @param object|string $entity
+     * @return class-string
      */
     public function findResourceTypeByEntity(mixed $entity): string
     {
@@ -22,5 +22,13 @@ class ResourceTypeRegistry
         }
 
         return $this->map[$entity];
+    }
+
+    /**
+     * @return class-string
+     */
+    public function findEntityByResourceType(string $resourceType): string
+    {
+        return array_flip($this->map)[$resourceType];
     }
 }
