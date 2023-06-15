@@ -68,12 +68,14 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
         }
 
         foreach ($data as $key => $value) {
-            $data[$key] = $this->getPropertyNormalizer()->denormalize([
-                'id' => $value['id'],
+            $entity = [
+                'id' => $value['id'] ?? null,
                 ...$value['attributes'],
-            ], $type, $format, $context);
+            ];
+
+            $data[$key] = $this->getPropertyNormalizer()->denormalize(array_filter($entity), $type, $format, $context);
         }
-        
+
         if ($hasOne === true) {
             return reset($data);
         }
