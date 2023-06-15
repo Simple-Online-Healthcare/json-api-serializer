@@ -67,10 +67,17 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
             throw new RuntimeException("Class mismatch: {$entityClass} !== {$type}");
         }
 
+        $transformer = $this->getTransformerRegistry()->findTransformerByEntity($type);
+
         foreach ($data as $key => $value) {
             $entity = [
                 'id' => $value['id'] ?? null,
                 ...$value['attributes'],
+            ];
+
+            $entity = [
+                ...$entity,
+                ...$transformer->beforeDenormalize($entity),
             ];
 
             $data[$key] = $this->getPropertyNormalizer()->denormalize(array_filter($entity), $type, $format, $context);

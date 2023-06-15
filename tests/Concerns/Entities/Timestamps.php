@@ -2,24 +2,26 @@
 
 namespace Tests\Concerns\Entities;
 
+use Carbon\Carbon;
+
 trait Timestamps
 {
-    protected string $createdAt;
-    protected string $updatedAt;
+    protected Carbon $createdAt;
+    protected Carbon $updatedAt;
 
     /**
-     * @return string
+     * @return Carbon
      */
-    public function getCreatedAt(): string
+    public function getCreatedAt(): Carbon
     {
         return $this->createdAt;
     }
 
     /**
-     * @param string $createdAt
+     * @param Carbon $createdAt
      * @return Timestamps
      */
-    public function setCreatedAt(string $createdAt): self
+    public function setCreatedAt(Carbon $createdAt): self
     {
         $this->createdAt = $createdAt;
 
@@ -27,18 +29,18 @@ trait Timestamps
     }
 
     /**
-     * @return string
+     * @return Carbon
      */
-    public function getUpdatedAt(): string
+    public function getUpdatedAt(): Carbon
     {
         return $this->updatedAt;
     }
 
     /**
-     * @param string $updatedAt
+     * @param Carbon $updatedAt
      * @return Timestamps
      */
-    public function setUpdatedAt(string $updatedAt): self
+    public function setUpdatedAt(Carbon $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
 

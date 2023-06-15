@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Carbon\Carbon;
 use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
 use SimpleOnlineHealthcare\JsonApi\Factories\JsonApiSpecFactory;
 use SimpleOnlineHealthcare\JsonApi\JsonApiSpec;
@@ -25,8 +26,8 @@ class SerializerTest extends TestCase
 
         $user = (new User())->setName('Grant Owen')
             ->setEmail('john.doe@simpleonlinehealthcare.com')
-            ->setCreatedAt('2023-06-13T15:02:08+00:00')
-            ->setUpdatedAt('2023-06-13T15:02:08+00:00');
+            ->setCreatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'))
+            ->setUpdatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'));
 
         $this->setProtectedAttribute($user, 'id', 20);
 
@@ -48,12 +49,12 @@ class SerializerTest extends TestCase
         $users = [
             (new User())->setName('Grant Owen')
                 ->setEmail('john.doe@simpleonlinehealthcare.com')
-                ->setCreatedAt('2023-06-13T15:02:08+00:00')
-                ->setUpdatedAt('2023-06-13T15:02:08+00:00'),
+                ->setCreatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'))
+                ->setUpdatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00')),
             (new User())->setName('Josh Murray')
                 ->setEmail('josh.murray@simpleonlinehealthcare.com')
-                ->setCreatedAt('2023-06-14T19:42:08+00:00')
-                ->setUpdatedAt('2023-06-19T10:32:13+00:00'),
+                ->setCreatedAt(Carbon::createFromTimeString('2023-06-14T19:42:08+00:00'))
+                ->setUpdatedAt(Carbon::createFromTimeString('2023-06-19T10:32:13+00:00')),
         ];
 
         $this->setProtectedAttribute($users[0], 'id', 20);
