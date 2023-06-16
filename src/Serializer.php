@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace SimpleOnlineHealthcare\JsonApi;
 
 use Illuminate\Foundation\Application;
-use RuntimeException;
-use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
+use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
 use SimpleOnlineHealthcare\JsonApi\Factories\JsonApiSpecFactory;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
+use SimpleOnlineHealthcare\JsonApi\Normalizers\JsonApiSpecNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -54,9 +54,9 @@ class Serializer
         );
     }
 
-    public function fromJsonApi()
+    public function fromJsonApi(string $json, string $class)
     {
-        throw new RuntimeException('To be implemented');
+        return $this->getSerializer()->deserialize($json, $class, 'json');
     }
 
     protected function getSerializer(): BaseSerializer

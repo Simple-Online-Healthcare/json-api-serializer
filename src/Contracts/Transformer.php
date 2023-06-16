@@ -9,4 +9,6 @@ use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 interface Transformer
 {
     public function transform(Entity $entity): array;
+
+    public function beforeDenormalize(array $entity): array;
 }

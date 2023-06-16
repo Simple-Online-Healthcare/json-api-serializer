@@ -3,3 +3,4 @@ vendor/*
 .DS_Store
 tools/php-cs-fixer/vendor/*
 composer.lock
+.phpunit.result.cache
