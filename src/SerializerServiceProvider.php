@@ -14,7 +14,7 @@ class SerializerServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([
-            __DIR__.'/../config/json-api-serializer.php' => config_path('json-api-serializer.php'),
+            __DIR__ . '/../config/json-api-serializer.php' => config_path('json-api-serializer.php'),
         ], 'config');
     }
 

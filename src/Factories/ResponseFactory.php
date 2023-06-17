@@ -16,8 +16,6 @@ class ResponseFactory
 
     /**
      * @param Entity|Entity[] $entities
-     *
-     * @return JsonResponse
      */
     public function make(mixed $entities): JsonResponse
     {
@@ -26,9 +24,6 @@ class ResponseFactory
         return JsonResponse::fromJsonString($data);
     }
 
-    /**
-     * @return Serializer
-     */
     public function getSerializer(): Serializer
     {
         return $this->serializer;

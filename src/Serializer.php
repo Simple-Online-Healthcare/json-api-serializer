@@ -9,7 +9,6 @@ use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
 use SimpleOnlineHealthcare\JsonApi\Factories\JsonApiSpecFactory;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
-use SimpleOnlineHealthcare\JsonApi\Normalizers\JsonApiSpecNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -39,7 +38,7 @@ class Serializer
     /**
      * @param Entity|Entity[] $entity
      */
-    public function toJsonApi(Entity|array $entity, ?Links $links = null): string
+    public function toJsonApi(Entity|array $entity, Links $links = null): string
     {
         $response = $this->getJsonApiSpecFactory()->make($entity, $links);
 
@@ -68,9 +67,6 @@ class Serializer
         return $this->application;
     }
 
-    /**
-     * @return JsonApiSpecFactory
-     */
     protected function getJsonApiSpecFactory(): JsonApiSpecFactory
     {
         return $this->jsonApiSpecFactory;

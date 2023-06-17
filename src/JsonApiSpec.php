@@ -20,25 +20,16 @@ class JsonApiSpec
     ) {
     }
 
-    /**
-     * @return JsonApi
-     */
     public function getJsonapi(): JsonApi
     {
         return $this->jsonapi;
     }
 
-    /**
-     * @return Links|null
-     */
     public function getLinks(): ?Links
     {
         return $this->links;
     }
 
-    /**
-     * @return array|Entity
-     */
     public function getData(): Entity|array
     {
         return $this->data;

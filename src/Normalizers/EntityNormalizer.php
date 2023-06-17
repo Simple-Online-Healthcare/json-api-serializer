@@ -12,6 +12,9 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 
+use function array_key_exists;
+use function is_string;
+
 /**
  * @method getSupportedTypes(?string $format)
  */
@@ -105,9 +108,6 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
         return $this->resourceTypeRegistry;
     }
 
-    /**
-     * @return PropertyNormalizer
-     */
     public function getPropertyNormalizer(): PropertyNormalizer
     {
         return $this->propertyNormalizer;
