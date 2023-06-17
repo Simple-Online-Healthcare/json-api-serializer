@@ -6,8 +6,11 @@ namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
 use RuntimeException;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
+use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
+use SimpleOnlineHealthcare\JsonApi\Registries\IncludedEntityRegistry;
 use SimpleOnlineHealthcare\JsonApi\Registries\ResourceTypeRegistry;
 use SimpleOnlineHealthcare\JsonApi\Registries\TransformerRegistry;
+use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
@@ -24,6 +27,7 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
         protected TransformerRegistry $transformerRegistry,
         protected ResourceTypeRegistry $resourceTypeRegistry,
         protected PropertyNormalizer $propertyNormalizer,
+        protected IncludedEntityRegistry $includedEntityRegistry,
     ) {
     }
 
@@ -33,12 +37,16 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
     public function normalize(mixed $object, string $format = null, array $context = []): array
     {
         $transformer = $this->getTransformerRegistry()->findTransformerByEntity($object);
+        $relationships = $transformer->relationships($object);
 
-        return [
+        $entity = [
             'type' => $this->getResourceTypeRegistry()->findResourceTypeByEntity($object),
             'id' => $object->getId(),
             'attributes' => $transformer->transform($object),
+            'relationships' => $this->restructureRelationships($relationships),
         ];
+
+        return array_filter($entity);
     }
 
     public function supportsNormalization(mixed $data, string $format = null): bool
@@ -98,6 +106,41 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
         return array_key_exists('data', $data);
     }
 
+    protected function restructureRelationships(array $relationships): array
+    {
+        $resourceTypeRegistry = $this->getResourceTypeRegistry();
+        $includedEntityRegistry = $this->getIncludedEntityRegistry();
+
+        return array_map(function (Relationship $relationship) use ($resourceTypeRegistry, $includedEntityRegistry) {
+            $hasOne = $relationship instanceof HasOne;
+            $entities = $relationship->getData();
+            $body = [];
+
+            if ($hasOne === true) {
+                $entities = [$entities];
+            }
+
+            foreach ($entities as $entity) {
+                if (empty($entity)) {
+                    continue;
+                }
+
+                $includedEntityRegistry->addEntity($entity);
+
+                $body[] = [
+                    'type' => $resourceTypeRegistry->findResourceTypeByEntity($entity),
+                    'id' => $entity->getId(),
+                ];
+            }
+
+            if ($hasOne === true) {
+                return reset($body) ?: [];
+            }
+
+            return $body;
+        }, $relationships);
+    }
+
     public function getTransformerRegistry(): TransformerRegistry
     {
         return $this->transformerRegistry;
@@ -111,5 +154,13 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
     public function getPropertyNormalizer(): PropertyNormalizer
     {
         return $this->propertyNormalizer;
+    }
+
+    /**
+     * @return IncludedEntityRegistry
+     */
+    public function getIncludedEntityRegistry(): IncludedEntityRegistry
+    {
+        return $this->includedEntityRegistry;
     }
 }

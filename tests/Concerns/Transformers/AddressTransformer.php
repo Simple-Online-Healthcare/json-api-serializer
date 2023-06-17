@@ -7,24 +7,25 @@ use DateTimeInterface;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Transformer;
 use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
-use Tests\Concerns\Entities\User;
+use Tests\Concerns\Entities\Address;
 
-class UserTransformer implements Transformer
+class AddressTransformer implements Transformer
 {
-    public function transform(User|Entity $entity): array
+    public function transform(Address|Entity $entity): array
     {
         return [
-            'name' => $entity->getName(),
-            'email' => $entity->getEmail(),
+            'lineOne' => $entity->getLineOne(),
+            'lineTwo' => $entity->getLineTwo(),
+            'postcode' => $entity->getPostcode(),
             'createdAt' => $entity->getCreatedAt()->format(DateTimeInterface::ATOM),
             'updatedAt' => $entity->getUpdatedAt()->format(DateTimeInterface::ATOM),
         ];
     }
 
-    public function relationships(User|Entity $entity): array
+    public function relationships(Address|Entity $entity): array
     {
         return [
-            'address' => new HasOne($entity->getAddress()),
+            'user' => new HasOne($entity->getUser()),
         ];
     }
 

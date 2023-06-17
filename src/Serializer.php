@@ -9,6 +9,7 @@ use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
 use SimpleOnlineHealthcare\JsonApi\Factories\JsonApiSpecFactory;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
+use SimpleOnlineHealthcare\JsonApi\Normalizers\IncludedNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -28,6 +29,7 @@ class Serializer
         $encoders = [new JsonEncoder()];
 
         $normalizers = [
+            $this->application->make(IncludedNormalizer::class),
             $this->application->make(EntityNormalizer::class),
             new PropertyNormalizer(),
         ];

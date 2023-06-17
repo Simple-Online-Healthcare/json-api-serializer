@@ -12,6 +12,7 @@ class User implements Entity
     protected string $name;
     protected string $email;
     protected string $password;
+    protected ?Address $address = null;
 
     /**
      * @return int
@@ -74,6 +75,25 @@ class User implements Entity
     public function setPassword(string $password): User
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @return Address|null
+     */
+    public function getAddress(): ?Address
+    {
+        return $this->address;
+    }
+
+    /**
+     * @param Address|null $address
+     * @return User
+     */
+    public function setAddress(?Address $address): User
+    {
+        $this->address = $address;
 
         return $this;
     }

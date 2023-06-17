@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi\Registries;
 
+use SimpleOnlineHealthcare\JsonApi\Exceptions\NoResourceTypeFoundForEntity;
+
 use function is_object;
 
 class ResourceTypeRegistry
@@ -19,6 +21,10 @@ class ResourceTypeRegistry
     {
         if (is_object($entity)) {
             $entity = $entity::class;
+        }
+
+        if (array_key_exists($entity, $this->map) === false) {
+            throw new NoResourceTypeFoundForEntity();
         }
 
         return $this->map[$entity];

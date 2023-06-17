@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleOnlineHealthcare\JsonApi;
 
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
+use SimpleOnlineHealthcare\JsonApi\Concerns\Included;
 use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
 
@@ -17,6 +18,7 @@ class JsonApiSpec
         protected JsonApi $jsonapi,
         protected ?Links $links,
         protected Entity|array $data,
+        protected Included $included,
     ) {
     }
 
