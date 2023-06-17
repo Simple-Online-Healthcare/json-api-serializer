@@ -6,6 +6,7 @@ namespace SimpleOnlineHealthcare\JsonApi\Registries;
 
 use SimpleOnlineHealthcare\JsonApi\Exceptions\NoResourceTypeFoundForEntity;
 
+use function array_key_exists;
 use function is_object;
 
 class ResourceTypeRegistry

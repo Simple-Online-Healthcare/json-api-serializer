@@ -156,9 +156,6 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
         return $this->propertyNormalizer;
     }
 
-    /**
-     * @return IncludedEntityRegistry
-     */
     public function getIncludedEntityRegistry(): IncludedEntityRegistry
     {
         return $this->includedEntityRegistry;

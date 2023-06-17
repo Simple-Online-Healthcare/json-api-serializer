@@ -27,9 +27,6 @@ class JsonApiSpecFactory
         return $this->jsonApi;
     }
 
-    /**
-     * @return Included
-     */
     public function getIncluded(): Included
     {
         return $this->included;
