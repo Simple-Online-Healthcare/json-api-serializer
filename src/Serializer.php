@@ -16,7 +16,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer as BaseSerializer;
 
-use const JSON_PRETTY_PRINT;
 use const JSON_UNESCAPED_UNICODE;
 
 class Serializer
@@ -48,7 +47,7 @@ class Serializer
             $response,
             JsonEncoder::FORMAT,
             [
-                JsonEncode::OPTIONS => JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT,
+                JsonEncode::OPTIONS => JSON_UNESCAPED_UNICODE,
                 AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
             ]
         );

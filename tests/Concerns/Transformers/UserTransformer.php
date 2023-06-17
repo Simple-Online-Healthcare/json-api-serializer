@@ -15,7 +15,6 @@ class UserTransformer implements Transformer
         return [
             'name' => $entity->getName(),
             'email' => $entity->getEmail(),
-            'password' => $entity->getPassword(),
             'createdAt' => $entity->getCreatedAt()->format(DateTimeInterface::ATOM),
             'updatedAt' => $entity->getUpdatedAt()->format(DateTimeInterface::ATOM),
         ];

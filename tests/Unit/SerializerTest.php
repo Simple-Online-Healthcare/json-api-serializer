@@ -12,6 +12,48 @@ use Tests\TestCase;
 
 class SerializerTest extends TestCase
 {
+    public function testToJsonApiWithOneEntity(): void
+    {
+        $serializer = $this->buildSerializer();
+
+        $json = '{"jsonapi":{"version":"1.0"},"data":{"type":"users","id":20,"attributes":{"name":"Grant Owen","email":"john.doe@simpleonlinehealthcare.com","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"}}}';
+
+        $user = (new User())->setName('Grant Owen')
+            ->setEmail('john.doe@simpleonlinehealthcare.com')
+            ->setCreatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'))
+            ->setUpdatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'));
+
+        $this->setProtectedAttribute($user, 'id', 20);
+
+        $responseJson = $serializer->toJsonApi($user);
+
+        $this->assertEquals($json, $responseJson);
+    }
+
+    public function testToJsonApiWithManyEntities(): void
+    {
+        $serializer = $this->buildSerializer();
+
+        $json = '{"jsonapi":{"version":"1.0"},"data":[{"type":"users","id":20,"attributes":{"name":"Grant Owen","email":"john.doe@simpleonlinehealthcare.com","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"}},{"type":"users","id":26,"attributes":{"name":"Josh Murray","email":"josh.murray@simpleonlinehealthcare.com","createdAt":"2023-06-14T19:42:08+00:00","updatedAt":"2023-06-19T10:32:13+00:00"}}]}';
+
+        $userOne = (new User())->setName('Grant Owen')
+            ->setEmail('john.doe@simpleonlinehealthcare.com')
+            ->setCreatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'))
+            ->setUpdatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'));
+
+        $userTwo = (new User())->setName('Josh Murray')
+            ->setEmail('josh.murray@simpleonlinehealthcare.com')
+            ->setCreatedAt(Carbon::createFromTimeString('2023-06-14T19:42:08+00:00'))
+            ->setUpdatedAt(Carbon::createFromTimeString('2023-06-19T10:32:13+00:00'));
+
+        $this->setProtectedAttribute($userOne, 'id', 20);
+        $this->setProtectedAttribute($userTwo, 'id', 26);
+
+        $responseJson = $serializer->toJsonApi([$userOne, $userTwo]);
+
+        $this->assertEquals($json, $responseJson);
+    }
+
     public function testFromJsonApiWithOneEntity(): void
     {
         $serializer = $this->buildSerializer();
@@ -68,7 +110,7 @@ class SerializerTest extends TestCase
     protected function buildSerializer(): Serializer
     {
         return new Serializer(
-            $this->application, new JsonApiSpecFactory(new JsonApi('v1'))
+            $this->application, new JsonApiSpecFactory(new JsonApi('1.0'))
         );
     }
 }
