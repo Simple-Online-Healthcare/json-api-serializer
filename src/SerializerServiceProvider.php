@@ -6,9 +6,6 @@ namespace SimpleOnlineHealthcare\JsonApi;
 
 use Illuminate\Support\ServiceProvider;
 use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
-use SimpleOnlineHealthcare\JsonApi\Registries\IncludedEntityRegistry;
-use SimpleOnlineHealthcare\JsonApi\Registries\ResourceTypeRegistry;
-use SimpleOnlineHealthcare\JsonApi\Registries\TransformerRegistry;
 
 class SerializerServiceProvider extends ServiceProvider
 {
@@ -19,22 +16,17 @@ class SerializerServiceProvider extends ServiceProvider
         ], 'config');
     }
 
-    public function register()
+    public function register(): void
     {
         $this->app->singleton(JsonApi::class, function () {
             return new JsonApi(config('json-api-serializer.jsonapi.version', '1.0'));
         });
 
-        $this->app->singleton(ResourceTypeRegistry::class, function () {
-            return new ResourceTypeRegistry(config('json-api-serializer.jsonapi.resource_type_mapping', []));
-        });
-
-        $this->app->singleton(TransformerRegistry::class, function () {
-            return new TransformerRegistry(config('json-api-serializer.jsonapi.transformer_mapping', []));
-        });
-
-        $this->app->singleton(IncludedEntityRegistry::class, function () {
-            return new IncludedEntityRegistry();
+        $this->app->singleton(Registry::class, function () {
+            return new Registry(
+                config('json-api-serializer.jsonapi.resource_type_mapping', []),
+                config('json-api-serializer.jsonapi.transformer_mapping', []),
+            );
         });
     }
 }

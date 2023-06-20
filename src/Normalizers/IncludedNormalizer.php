@@ -6,9 +6,7 @@ namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Included;
-use SimpleOnlineHealthcare\JsonApi\Registries\IncludedEntityRegistry;
-use SimpleOnlineHealthcare\JsonApi\Registries\ResourceTypeRegistry;
-use SimpleOnlineHealthcare\JsonApi\Registries\TransformerRegistry;
+use SimpleOnlineHealthcare\JsonApi\Registry;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 
@@ -18,10 +16,8 @@ use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 class IncludedNormalizer implements NormalizerInterface
 {
     public function __construct(
-        protected TransformerRegistry $transformerRegistry,
-        protected ResourceTypeRegistry $resourceTypeRegistry,
+        protected Registry $registry,
         protected PropertyNormalizer $propertyNormalizer,
-        protected IncludedEntityRegistry $includedEntityRegistry,
     ) {
     }
 
@@ -30,7 +26,7 @@ class IncludedNormalizer implements NormalizerInterface
      */
     public function normalize(mixed $object, string $format = null, array $context = []): array
     {
-        $entities = $this->getIncludedEntityRegistry()->getEntities();
+        $entities = $this->getRegistry()->getIncludedEntities();
 
         if (empty($entities)) {
             return [];
@@ -39,10 +35,10 @@ class IncludedNormalizer implements NormalizerInterface
         $included = [];
 
         foreach ($entities as $entity) {
-            $transformer = $this->getTransformerRegistry()->findTransformerByEntity($entity);
+            $transformer = $this->getRegistry()->findTransformerByEntity($entity);
 
             $included[] = [
-                'type' => $this->getResourceTypeRegistry()->findResourceTypeByEntity($entity),
+                'type' => $this->getRegistry()->findResourceTypeByEntity($entity),
                 'id' => $entity->getId(),
                 'attributes' => $transformer->transform($entity),
             ];
@@ -56,23 +52,16 @@ class IncludedNormalizer implements NormalizerInterface
         return $data instanceof Included;
     }
 
-    public function getTransformerRegistry(): TransformerRegistry
+    /**
+     * @return Registry
+     */
+    public function getRegistry(): Registry
     {
-        return $this->transformerRegistry;
-    }
-
-    public function getResourceTypeRegistry(): ResourceTypeRegistry
-    {
-        return $this->resourceTypeRegistry;
+        return $this->registry;
     }
 
     public function getPropertyNormalizer(): PropertyNormalizer
     {
         return $this->propertyNormalizer;
-    }
-
-    public function getIncludedEntityRegistry(): IncludedEntityRegistry
-    {
-        return $this->includedEntityRegistry;
     }
 }
