@@ -7,9 +7,7 @@ namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 use RuntimeException;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
-use SimpleOnlineHealthcare\JsonApi\Registries\IncludedEntityRegistry;
-use SimpleOnlineHealthcare\JsonApi\Registries\ResourceTypeRegistry;
-use SimpleOnlineHealthcare\JsonApi\Registries\TransformerRegistry;
+use SimpleOnlineHealthcare\JsonApi\Registry;
 use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -24,10 +22,8 @@ use function is_string;
 class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
 {
     public function __construct(
-        protected TransformerRegistry $transformerRegistry,
-        protected ResourceTypeRegistry $resourceTypeRegistry,
+        protected Registry $registry,
         protected PropertyNormalizer $propertyNormalizer,
-        protected IncludedEntityRegistry $includedEntityRegistry,
     ) {
     }
 
@@ -36,11 +32,11 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
      */
     public function normalize(mixed $object, string $format = null, array $context = []): array
     {
-        $transformer = $this->getTransformerRegistry()->findTransformerByEntity($object);
+        $transformer = $this->getRegistry()->findTransformerByEntity($object);
         $relationships = $transformer->relationships($object);
 
         $entity = [
-            'type' => $this->getResourceTypeRegistry()->findResourceTypeByEntity($object),
+            'type' => $this->getRegistry()->findResourceTypeByEntity($object),
             'id' => $object->getId(),
             'attributes' => $transformer->transform($object),
             'relationships' => $this->restructureRelationships($relationships),
@@ -72,13 +68,13 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
         }
 
         $resourceTypeFromJson = $data[0]['type'];
-        $entityClass = $this->getResourceTypeRegistry()->findEntityByResourceType($resourceTypeFromJson);
+        $entityClass = $this->getRegistry()->findEntityByResourceType($resourceTypeFromJson);
 
         if ($entityClass !== $type) {
             throw new RuntimeException("Class mismatch: {$entityClass} !== {$type}");
         }
 
-        $transformer = $this->getTransformerRegistry()->findTransformerByEntity($type);
+        $transformer = $this->getRegistry()->findTransformerByEntity($type);
 
         foreach ($data as $key => $value) {
             $entity = [
@@ -108,10 +104,9 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
 
     protected function restructureRelationships(array $relationships): array
     {
-        $resourceTypeRegistry = $this->getResourceTypeRegistry();
-        $includedEntityRegistry = $this->getIncludedEntityRegistry();
+        $registry = $this->getRegistry();
 
-        return array_map(function (Relationship $relationship) use ($resourceTypeRegistry, $includedEntityRegistry) {
+        return array_map(function (Relationship $relationship) use ($registry) {
             $hasOne = $relationship instanceof HasOne;
             $entities = $relationship->getData();
             $body = [];
@@ -125,10 +120,10 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
                     continue;
                 }
 
-                $includedEntityRegistry->addEntity($entity);
+                $registry->addIncludedEntity($entity);
 
                 $body[] = [
-                    'type' => $resourceTypeRegistry->findResourceTypeByEntity($entity),
+                    'type' => $registry->findResourceTypeByEntity($entity),
                     'id' => $entity->getId(),
                 ];
             }
@@ -141,23 +136,16 @@ class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
         }, $relationships);
     }
 
-    public function getTransformerRegistry(): TransformerRegistry
+    /**
+     * @return Registry
+     */
+    public function getRegistry(): Registry
     {
-        return $this->transformerRegistry;
-    }
-
-    public function getResourceTypeRegistry(): ResourceTypeRegistry
-    {
-        return $this->resourceTypeRegistry;
+        return $this->registry;
     }
 
     public function getPropertyNormalizer(): PropertyNormalizer
     {
         return $this->propertyNormalizer;
-    }
-
-    public function getIncludedEntityRegistry(): IncludedEntityRegistry
-    {
-        return $this->includedEntityRegistry;
     }
 }
