@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleOnlineHealthcare\JsonApi;
 
-use SimpleOnlineHealthcare\JsonApi\Contracts\Transformer;
 use SimpleOnlineHealthcare\JsonApi\Exceptions\NoResourceTypeFoundForEntity;
-use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
+
+use function array_key_exists;
+use function is_object;
 
 class Registry
 {
     public function __construct(
         protected array $resourceTypeMapping,
-        protected array $transformerMapping,
-        protected array $includedEntityMapping = [],
+        protected array $normalizerMapping,
     ) {
     }
 
@@ -39,30 +41,8 @@ class Registry
         return array_flip($this->resourceTypeMapping)[$resourceType];
     }
 
-    /**
-     * @param object|string $entity
-     */
-    public function findTransformerByEntity(mixed $entity): Transformer
+    public function getNormalizers(): array
     {
-        if (is_object($entity)) {
-            $entity = $entity::class;
-        }
-
-        return new $this->transformerMapping[$entity]();
-    }
-
-    /**
-     * @return Entity[]
-     */
-    public function getIncludedEntities(): array
-    {
-        return $this->includedEntityMapping;
-    }
-
-    public function addIncludedEntity(Entity $entity): self
-    {
-        $this->includedEntityMapping[] = $entity;
-
-        return $this;
+        return $this->normalizerMapping;
     }
 }

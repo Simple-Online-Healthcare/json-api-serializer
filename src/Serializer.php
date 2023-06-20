@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace SimpleOnlineHealthcare\JsonApi;
 
 use Illuminate\Foundation\Application;
-use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
-use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
 use SimpleOnlineHealthcare\JsonApi\Factories\JsonApiSpecFactory;
-use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
-use SimpleOnlineHealthcare\JsonApi\Normalizers\IncludedNormalizer;
+use SimpleOnlineHealthcare\JsonApi\Normalizers\JsonApiSpecNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer as BaseSerializer;
 
 use const JSON_UNESCAPED_UNICODE;
@@ -24,28 +21,22 @@ class Serializer
 
     public function __construct(
         protected Application $application,
+        protected Registry $registry,
         protected JsonApiSpecFactory $jsonApiSpecFactory,
     ) {
         $encoders = [new JsonEncoder()];
 
-        $normalizers = [
-            $this->application->make(IncludedNormalizer::class),
-            $this->application->make(EntityNormalizer::class),
-            new PropertyNormalizer(),
-        ];
+        $normalizers = $this->instantiateApplicationNormalizers() + [
+                new JsonApiSpecNormalizer(new ObjectNormalizer()),
+            ];
 
         $this->serializer = new BaseSerializer($normalizers, $encoders);
     }
 
-    /**
-     * @param Entity|Entity[] $entity
-     */
-    public function toJsonApi(Entity|array $entity, Links $links = null): string
+    public function toJsonApi(JsonApiSpec $jsonApiSpec): string
     {
-        $response = $this->getJsonApiSpecFactory()->make($entity, $links);
-
         return $this->getSerializer()->serialize(
-            $response,
+            $jsonApiSpec,
             JsonEncoder::FORMAT,
             [
                 JsonEncode::OPTIONS => JSON_UNESCAPED_UNICODE,
@@ -56,17 +47,29 @@ class Serializer
 
     public function fromJsonApi(string $json, string $class)
     {
-        return $this->getSerializer()->deserialize($json, $class, 'json');
+        return $this->getSerializer()->deserialize($json, $class, JsonEncoder::FORMAT);
     }
 
-    protected function getSerializer(): BaseSerializer
+    protected function instantiateApplicationNormalizers(): array
+    {
+        return array_map(function (string $className) {
+            return $this->getApplication()->make($className);
+        }, $this->getRegistry()->getNormalizers());
+    }
+
+    public function getSerializer(): BaseSerializer
     {
         return $this->serializer;
     }
 
-    protected function getApplication(): Application
+    public function getApplication(): Application
     {
         return $this->application;
+    }
+
+    public function getRegistry(): Registry
+    {
+        return $this->registry;
     }
 
     protected function getJsonApiSpecFactory(): JsonApiSpecFactory
