@@ -7,6 +7,8 @@ namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 use RuntimeException;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\JsonApiSpec;
+use SimpleOnlineHealthcare\JsonApi\Registry;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -27,12 +29,15 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
     protected SerializerInterface $serializer;
     protected NormalizerInterface $normalizer;
 
-    public function __construct(protected ObjectNormalizer $objectNormalizer)
-    {
+    public function __construct(
+        protected Registry $registry,
+        protected ObjectNormalizer $objectNormalizer,
+    ) {
     }
 
     /**
      * @param JsonApiSpec $object
+     * @throws ExceptionInterface
      */
     public function normalize(mixed $object, string $format = null, array $context = []): array
     {
@@ -43,10 +48,17 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
             $data = [$data];
         }
 
-        $data = array_map(function (Entity $entity) {
-            $serialised = $this->getSerializer()->serialize($entity, 'json');
+        $data = array_map(function (Entity $entity) use ($format) {
+            /** @var NormalizerInterface $normalizer */
+            foreach ($this->getRegistry()->getNormalizers() as $normalizer) {
+                if ($normalizer->supportsNormalization($entity, $format)) {
+                    return $normalizer->normalize($entity, $format);
+                }
+            }
 
-            return json_decode($serialised, true);
+            $className = get_class($entity);
+
+            throw new RuntimeException("No normaliser found for {$className}");
         }, $data);
 
         // $value is the JsonApi, Links or Entity|Entities[] objects
@@ -72,6 +84,7 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
             'jsonapi' => $object->getJsonapi(),
             'links' => $object->getLinks(),
             'data' => $hasOne ? reset($data) : $data,
+            'included' => $this->getRegistry()->getIncludedEntities(),
         ]);
 
         return array_filter($jsonApi);
@@ -115,6 +128,14 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
         return array_key_exists('data', $data)
             && (array_key_exists('type', $firstValueInData)
                 || array_key_exists('type', $firstValueInInnerData));
+    }
+
+    /**
+     * @return Registry
+     */
+    public function getRegistry(): Registry
+    {
+        return $this->registry;
     }
 
     public function getObjectNormalizer(): ObjectNormalizer

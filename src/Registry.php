@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi;
 
+use Illuminate\Foundation\Application;
+use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Exceptions\NoResourceTypeFoundForEntity;
 
 use function array_key_exists;
@@ -12,9 +14,15 @@ use function is_object;
 class Registry
 {
     public function __construct(
+        protected Application $application,
         protected array $resourceTypeMapping,
         protected array $normalizerMapping,
+        protected array $includedEntities = [],
     ) {
+        // Instantiate the normalisers
+        $this->normalizerMapping = array_map(function (string $className) {
+            return $this->application->make($className);
+        }, $this->normalizerMapping);
     }
 
     /**
@@ -44,5 +52,18 @@ class Registry
     public function getNormalizers(): array
     {
         return $this->normalizerMapping;
+    }
+
+    /**
+     * @return array
+     */
+    public function getIncludedEntities(): array
+    {
+        return $this->includedEntities;
+    }
+
+    public function addToIncludedEntities(Entity $entity): void
+    {
+        $this->includedEntities[] = $entity;
     }
 }
