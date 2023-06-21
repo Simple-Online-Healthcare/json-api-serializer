@@ -12,4 +12,6 @@ interface Relationship
      * @return Entity|Entity[]|null
      */
     public function getData(): Entity|array|null;
+
+    public function getResourceType(): ?string;
 }

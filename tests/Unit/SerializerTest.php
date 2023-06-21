@@ -66,7 +66,7 @@ class SerializerTest extends TestCase
             ->setCreatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'))
             ->setUpdatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'));
 
-        $this->setProtectedAttribute($user, 'id', 20);;
+        $this->setProtectedAttribute($user, 'id', 20);
 
         $responseJson = $this->serializer->toJsonApi(
             $this->jsonApiSpecFactory->make($user)

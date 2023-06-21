@@ -30,7 +30,7 @@ class UserNormalizer extends EntityNormalizer
     public function relationships(User|Entity $entity): array
     {
         return [
-            'address' => new HasOne($entity->getAddress()),
+            'address' => new HasOne($entity->getAddress(), 'addresses'),
         ];
     }
 

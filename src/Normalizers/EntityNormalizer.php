@@ -7,6 +7,7 @@ namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Field;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
+use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
 
 abstract class EntityNormalizer extends Normalizer
 {
@@ -52,7 +53,7 @@ abstract class EntityNormalizer extends Normalizer
             'type' => $this->resourceType,
             'id' => $this->id($object),
             'attributes' => $this->normalizeFields($attributes),
-            'relationships' => $context['omitRelations'] !== false ? array_filter($relationships) : [],
+            'relationships' => $context['omitRelations'] !== true ? array_filter($relationships) : [],
         ]);
     }
 
@@ -79,16 +80,46 @@ abstract class EntityNormalizer extends Normalizer
 
     protected function normalizeRelationships(array $relationships): array
     {
-        foreach ($relationships as $relationship) {
+        $buffer = [];
+        $relationBuffer = [];
+
+        /**  @var Relationship $relationship */
+        foreach ($relationships as $key => $relationship) {
+            $hasOne = $relationship instanceof HasOne;
             $relation = $relationship->getData();
 
             if (empty($relation)) {
-                continue;
+                return [];
             }
 
-            $this->registry->addToIncludedEntities($relation);
+            if ($hasOne) {
+                $relation = [$relation];
+            }
+
+            foreach ($relation as $relationItem) {
+                $relationBuffer[] = $this->structureRelationship(
+                    $relationship->getResourceType() ?? $key,
+                    $relationItem->getId()
+                );
+
+                $this->registry->addToIncludedEntities($relationItem);
+            }
+
+            if ($hasOne) {
+                $relationBuffer = reset($relationBuffer);
+            }
+
+            $buffer[$key] = $relationBuffer;
         }
 
-        return $relationships;
+        return $buffer;
+    }
+
+    protected function structureRelationship(string $resourceType, string|int $id): array
+    {
+        return [
+            'type' => $resourceType,
+            'id' => $id,
+        ];
     }
 }
