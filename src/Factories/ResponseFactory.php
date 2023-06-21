@@ -10,8 +10,10 @@ use SimpleOnlineHealthcare\JsonApi\Serializer;
 
 class ResponseFactory
 {
-    public function __construct(protected Serializer $serializer)
-    {
+    public function __construct(
+        protected Serializer $serializer,
+        protected JsonApiSpecFactory $jsonApiSpecFactory,
+    ) {
     }
 
     /**
@@ -19,7 +21,9 @@ class ResponseFactory
      */
     public function make(mixed $entities): JsonResponse
     {
-        $data = $this->getSerializer()->toJsonApi($entities);
+        $jsonApiSpec = $this->getJsonApiSpecFactory()->make($entities);
+        
+        $data = $this->getSerializer()->toJsonApi($jsonApiSpec);
 
         return JsonResponse::fromJsonString($data);
     }
@@ -27,5 +31,13 @@ class ResponseFactory
     public function getSerializer(): Serializer
     {
         return $this->serializer;
+    }
+
+    /**
+     * @return JsonApiSpecFactory
+     */
+    public function getJsonApiSpecFactory(): JsonApiSpecFactory
+    {
+        return $this->jsonApiSpecFactory;
     }
 }
