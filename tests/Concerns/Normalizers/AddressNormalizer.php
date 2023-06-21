@@ -2,7 +2,7 @@
 
 namespace Tests\Concerns\Normalizers;
 
-use SimpleOnlineHealthcare\JsonApi\Normalizer;
+use SimpleOnlineHealthcare\JsonApi\Normalizers\Normalizer;
 
 /**
  * @method  getSupportedTypes(?string $format)

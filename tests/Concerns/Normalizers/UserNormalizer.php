@@ -3,35 +3,34 @@
 namespace Tests\Concerns\Normalizers;
 
 use Carbon\Carbon;
-use DateTimeInterface;
-use SimpleOnlineHealthcare\JsonApi\Normalizer;
+use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
+use SimpleOnlineHealthcare\JsonApi\Fields\Date;
+use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
 use Tests\Concerns\Entities\User;
 
 /**
  * @method  getSupportedTypes(?string $format)
  */
-class UserNormalizer extends Normalizer
+class UserNormalizer extends EntityNormalizer
 {
-    /**
-     * @param User $object
-     */
-    public function normalize(mixed $object, string $format = null, array $context = []): array
+    protected string $entityClassName = User::class;
+    protected string $resourceType = 'users';
+
+    public function attributes(User|Entity $entity): array
     {
         return [
-            'type' => 'users',
-            'id' => $object->getId(),
-            'attributes' => [
-                'name' => $object->getName(),
-                'email' => $object->getEmail(),
-                'createdAt' => $object->getCreatedAt()->format(DateTimeInterface::ATOM),
-                'updatedAt' => $object->getUpdatedAt()->format(DateTimeInterface::ATOM),
-            ],
+            'name' => $entity->getName(),
+            'email' => $entity->getEmail(),
+            'createdAt' => new Date($entity->getCreatedAt()),
+            'updatedAt' => new Date($entity->getUpdatedAt()),
         ];
     }
 
-    public function supportsNormalization(mixed $data, string $format = null): bool
+    public function relationships(User|Entity $entity): array
     {
-        return $data instanceof User;
+        return [
+            'address' => $entity->getAddress(),
+        ];
     }
 
     public function denormalize(mixed $data, string $type, string $format = null, array $context = [])
@@ -47,10 +46,5 @@ class UserNormalizer extends Normalizer
         ];
 
         return $this->getPropertyNormalizer()->denormalize($data, $type, $format);
-    }
-
-    public function supportsDenormalization(mixed $data, string $type, string $format = null): bool
-    {
-        return $this->getResourceTypeFromJson($data) === 'users';
     }
 }

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
-use RuntimeException;
+use Closure;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\JsonApiSpec;
 use SimpleOnlineHealthcare\JsonApi\Registry;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -18,7 +17,6 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 use function array_key_exists;
 use function is_array;
-use function is_string;
 
 /**
  * @method getSupportedTypes(?string $format)
@@ -29,6 +27,11 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
     protected SerializerInterface $serializer;
     protected NormalizerInterface $normalizer;
 
+    /**
+     * @var array<class-string, NormalizerInterface>
+     */
+    protected array $cachedNormalizers;
+
     public function __construct(
         protected Registry $registry,
         protected ObjectNormalizer $objectNormalizer,
@@ -37,57 +40,41 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
 
     /**
      * @param JsonApiSpec $object
-     * @throws ExceptionInterface
      */
     public function normalize(mixed $object, string $format = null, array $context = []): array
     {
-        $data = $object->getData();
-        $hasOne = $data instanceof Entity;
-
-        if ($hasOne) {
-            $data = [$data];
-        }
-
-        $data = array_map(function (Entity $entity) use ($format) {
-            /** @var NormalizerInterface $normalizer */
-            foreach ($this->getRegistry()->getNormalizers() as $normalizer) {
-                if ($normalizer->supportsNormalization($entity, $format)) {
-                    return $normalizer->normalize($entity, $format);
-                }
-            }
-
-            $className = get_class($entity);
-
-            throw new RuntimeException("No normaliser found for {$className}");
-        }, $data);
-
         // $value is the JsonApi, Links or Entity|Entities[] objects
-        $jsonApi = array_map(function (array|object|string|null $value) {
-            if (empty($value)) {
-                return [];
-            }
-
-            if (is_string($value)) {
-                if (json_decode($value, true) === false) {
-                    throw new RuntimeException('Not valid json!');
-                }
-
-                return $value;
-            }
-
-            if (!is_array($value)) {
-                $value = $this->getObjectNormalizer()->normalize($value, 'json');
-            }
-
-            return array_filter($value);
-        }, [
+        $jsonApi = array_map($this->complexCallback($format), [
             'jsonapi' => $object->getJsonapi(),
             'links' => $object->getLinks(),
-            'data' => $hasOne ? reset($data) : $data,
+            'data' => $object->getData(),
             'included' => $this->getRegistry()->getIncludedEntities(),
         ]);
 
         return array_filter($jsonApi);
+    }
+
+    public function complexCallback(string $format): Closure
+    {
+        return function (array|object|string|null $value) use ($format) {
+            if (empty($value)) {
+                return [];
+            }
+
+            if (is_array($value) && reset($value) instanceof Entity) {
+                $value = array_map($this->complexCallback($format), $value);
+            } else {
+                $value = $this->normalizeEntity($value, $format);
+            }
+
+            if (is_array($value)) {
+                return array_filter($value);
+            }
+
+            return array_filter(
+                $this->getObjectNormalizer()->normalize($value, 'json')
+            );
+        };
     }
 
     public function supportsNormalization(mixed $data, string $format = null): bool
@@ -128,6 +115,26 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
         return array_key_exists('data', $data)
             && (array_key_exists('type', $firstValueInData)
                 || array_key_exists('type', $firstValueInInnerData));
+    }
+
+    protected function normalizeEntity(object $entity, string $format): object|array
+    {
+        $entityClassName = get_class($entity);
+
+        if (isset($this->cachedNormalizers) && array_key_exists($entityClassName, $this->cachedNormalizers)) {
+            return $this->cachedNormalizers[$entityClassName]->normalize($entity, $format);
+        }
+
+        /** @var NormalizerInterface $normalizer */
+        foreach ($this->getRegistry()->getNormalizers() as $normalizer) {
+            if ($normalizer->supportsNormalization($entity, $format)) {
+                $this->cachedNormalizers[$entityClassName] = $normalizer;
+
+                return $normalizer->normalize($entity, $format);
+            }
+        }
+
+        return $entity;
     }
 
     /**

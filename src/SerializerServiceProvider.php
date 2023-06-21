@@ -12,7 +12,7 @@ class SerializerServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([
-            __DIR__ . '/../config/json-api-serializer.php' => config_path('json-api-serializer.php'),
+            __DIR__.'/../config/json-api-serializer.php' => config_path('json-api-serializer.php'),
         ], 'config');
     }
 
@@ -24,6 +24,7 @@ class SerializerServiceProvider extends ServiceProvider
 
         $this->app->singleton(Registry::class, function () {
             return new Registry(
+                $this->app,
                 config('json-api-serializer.jsonapi.resource_types', []),
                 config('json-api-serializer.jsonapi.normalizers', []),
             );
