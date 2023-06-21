@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi;
 
+use DateTimeInterface;
+use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
@@ -31,7 +33,15 @@ abstract class Normalizer implements NormalizerInterface, DenormalizerInterface
         return $data['type'] ?? null;
     }
 
-    public function getPropertyNormalizer(): PropertyNormalizer
+    protected function timestamps(Entity $entity): array
+    {
+        return [
+            'createdAt' => $entity->getCreatedAt()->format(DateTimeInterface::ATOM),
+            'updatedAt' => $entity->getUpdatedAt()->format(DateTimeInterface::ATOM),
+        ];
+    }
+
+    protected function getPropertyNormalizer(): PropertyNormalizer
     {
         return $this->propertyNormalizer;
     }
