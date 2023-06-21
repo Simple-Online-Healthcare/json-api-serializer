@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Fields\Date;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
+use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
 use Tests\Concerns\Entities\User;
 
 /**
@@ -29,7 +30,7 @@ class UserNormalizer extends EntityNormalizer
     public function relationships(User|Entity $entity): array
     {
         return [
-            'address' => $entity->getAddress(),
+            'address' => new HasOne($entity->getAddress()),
         ];
     }
 

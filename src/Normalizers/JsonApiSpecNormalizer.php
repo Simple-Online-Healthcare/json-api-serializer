@@ -48,23 +48,32 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
             'jsonapi' => $object->getJsonapi(),
             'links' => $object->getLinks(),
             'data' => $object->getData(),
-            'included' => $this->getRegistry()->getIncludedEntities(),
         ]);
 
-        return array_filter($jsonApi);
+        // The relationships have to be run separately due to using an array_map.
+        // Essentially, if we'd be using the included entities from the registry before
+        // the code started running, it'd always be an empty array.
+        $included = [
+            'included' => array_map(
+                $this->complexCallback($format, ['omitRelations' => true]),
+                $this->getRegistry()->getIncludedEntities()
+            ),
+        ];
+
+        return array_filter($jsonApi + $included);
     }
 
-    public function complexCallback(string $format): Closure
+    public function complexCallback(string $format, array $context = []): Closure
     {
-        return function (array|object|string|null $value) use ($format) {
+        return function (array|object|string|null $value) use ($format, $context) {
             if (empty($value)) {
                 return [];
             }
 
             if (is_array($value) && reset($value) instanceof Entity) {
-                $value = array_map($this->complexCallback($format), $value);
+                $value = array_map($this->complexCallback($format, $context), $value);
             } else {
-                $value = $this->normalizeEntity($value, $format);
+                $value = $this->normalizeEntity($value, $format, $context);
             }
 
             if (is_array($value)) {
@@ -117,7 +126,7 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
                 || array_key_exists('type', $firstValueInInnerData));
     }
 
-    protected function normalizeEntity(object $entity, string $format): object|array
+    protected function normalizeEntity(object $entity, string $format, array $context = []): object|array
     {
         $entityClassName = get_class($entity);
 
@@ -130,7 +139,7 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
             if ($normalizer->supportsNormalization($entity, $format)) {
                 $this->cachedNormalizers[$entityClassName] = $normalizer;
 
-                return $normalizer->normalize($entity, $format);
+                return $normalizer->normalize($entity, $format, $context);
             }
         }
 

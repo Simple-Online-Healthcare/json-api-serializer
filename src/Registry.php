@@ -21,7 +21,7 @@ class Registry
     ) {
         // Instantiate the normalisers
         $this->normalizerMapping = array_map(function (string $className) {
-            return $this->application->make($className);
+            return $this->application->make($className)->setRegistry($this);
         }, $this->normalizerMapping);
     }
 

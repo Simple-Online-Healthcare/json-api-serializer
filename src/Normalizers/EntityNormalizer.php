@@ -6,6 +6,7 @@ namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Field;
+use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
 
 abstract class EntityNormalizer extends Normalizer
 {
@@ -34,6 +35,8 @@ abstract class EntityNormalizer extends Normalizer
 
     /**
      * Returns the relationships of the entity
+     *
+     * @return Relationship[]
      */
     public function relationships(Entity $entity): array
     {
@@ -43,13 +46,13 @@ abstract class EntityNormalizer extends Normalizer
     public function normalize(mixed $object, string $format = null, array $context = []): array
     {
         $attributes = $this->attributes($object);
-        $relationships = $this->relationships($object);
+        $relationships = $this->normalizeRelationships($this->relationships($object));
 
         return array_filter([
             'type' => $this->resourceType,
             'id' => $this->id($object),
             'attributes' => $this->normalizeFields($attributes),
-            'relationships' => array_filter($relationships),
+            'relationships' => $context['omitRelations'] !== false ? array_filter($relationships) : [],
         ]);
     }
 
@@ -72,5 +75,20 @@ abstract class EntityNormalizer extends Normalizer
 
             return $field->normalize();
         }, $fields);
+    }
+
+    protected function normalizeRelationships(array $relationships): array
+    {
+        foreach ($relationships as $relationship) {
+            $relation = $relationship->getData();
+
+            if (empty($relation)) {
+                continue;
+            }
+
+            $this->registry->addToIncludedEntities($relation);
+        }
+
+        return $relationships;
     }
 }

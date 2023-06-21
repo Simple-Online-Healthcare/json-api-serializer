@@ -59,7 +59,7 @@ class SerializerTest extends TestCase
 
     public function testToJsonApiWithOneEntity(): void
     {
-        $json = '{"jsonapi":{"version":"1.0"},"data":{"type":"users","id":20,"attributes":{"name":"Grant Owen","email":"john.doe@simpleonlinehealthcare.com","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"}}}';
+        $json = '{"jsonapi":{"version":"1.0"},"data":{"type":"users","id":20,"attributes":{"name":"Grant Owen","email":"john.doe@simpleonlinehealthcare.com","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"},"relationships":{"address":{}}}}';
 
         $user = (new User())->setName('Grant Owen')
             ->setEmail('john.doe@simpleonlinehealthcare.com')
@@ -77,7 +77,7 @@ class SerializerTest extends TestCase
 
     public function testToJsonApiWithManyEntities(): void
     {
-        $json = '{"jsonapi":{"version":"1.0"},"data":[{"type":"users","id":20,"attributes":{"name":"Grant Owen","email":"john.doe@simpleonlinehealthcare.com","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"}},{"type":"users","id":26,"attributes":{"name":"Josh Murray","email":"josh.murray@simpleonlinehealthcare.com","createdAt":"2023-06-14T19:42:08+00:00","updatedAt":"2023-06-19T10:32:13+00:00"}}]}';
+        $json = '{"jsonapi":{"version":"1.0"},"data":[{"type":"users","id":20,"attributes":{"name":"Grant Owen","email":"john.doe@simpleonlinehealthcare.com","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"},"relationships":{"address":{}}},{"type":"users","id":26,"attributes":{"name":"Josh Murray","email":"josh.murray@simpleonlinehealthcare.com","createdAt":"2023-06-14T19:42:08+00:00","updatedAt":"2023-06-19T10:32:13+00:00"},"relationships":{"address":{}}}]}';
 
         $userOne = (new User())->setName('Grant Owen')
             ->setEmail('john.doe@simpleonlinehealthcare.com')
@@ -159,7 +159,8 @@ class SerializerTest extends TestCase
             ->setCreatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'))
             ->setUpdatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'));
 
-        $address = (new Address())->setLineOne('Line One')
+        $address = (new Address())->setUser($user)
+            ->setLineOne('Line One')
             ->setLineTwo('Line Two')
             ->setPostcode('SP4 1GB')
             ->setCreatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'))
