@@ -21,7 +21,8 @@ use function is_string;
 /**
  * @method getSupportedTypes(?string $format)
  */
-class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterface, NormalizerAwareInterface, SerializerAwareInterface
+class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterface, NormalizerAwareInterface,
+                                       SerializerAwareInterface
 {
     protected SerializerInterface $serializer;
     protected NormalizerInterface $normalizer;
@@ -49,7 +50,11 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
         }, $data);
 
         // $value is the JsonApi, Links or Entity|Entities[] objects
-        $jsonApi = array_map(function (array|object|string $value) {
+        $jsonApi = array_map(function (array|object|string|null $value) {
+            if (empty($value)) {
+                return [];
+            }
+
             if (is_string($value)) {
                 if (json_decode($value, true) === false) {
                     throw new RuntimeException('Not valid json!');
