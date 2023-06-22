@@ -64,6 +64,10 @@ class Registry
 
     public function addToIncludedEntities(Entity $entity): void
     {
+        if (in_array($entity, $this->includedEntities, true)) {
+            return;
+        }
+
         $this->includedEntities[] = $entity;
     }
 }
