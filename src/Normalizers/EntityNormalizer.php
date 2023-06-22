@@ -7,6 +7,7 @@ namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Field;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
+use SimpleOnlineHealthcare\JsonApi\Relationships\EmptyRelation;
 use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
 
 abstract class EntityNormalizer extends Normalizer
@@ -53,7 +54,7 @@ abstract class EntityNormalizer extends Normalizer
             'type' => $this->resourceType,
             'id' => $this->id($object),
             'attributes' => $this->normalizeFields($attributes),
-            'relationships' => $context['omitRelations'] !== true ? array_filter($relationships) : [],
+            'relationships' => $context['omitRelations'] !== true ? $relationships : [],
         ]);
     }
 
@@ -89,7 +90,17 @@ abstract class EntityNormalizer extends Normalizer
             $relation = $relationship->getData();
 
             if (empty($relation)) {
-                return [];
+                // This line essentially just ensures that the relationship key is always
+                // present, regardless is the relationship is empty or not.
+                $value = [];
+
+                if ($relationship instanceof HasOne) {
+                    $value = new EmptyRelation();
+                }
+
+                $buffer[$key] = $value;
+
+                continue;
             }
 
             if ($hasOne) {

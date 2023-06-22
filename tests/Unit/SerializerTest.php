@@ -179,14 +179,15 @@ class SerializerTest extends TestCase
 
     public function testToJsonApiWithManyEntitiesAndRelationships(): void
     {
-        $expectedJson = '{"jsonapi":{"version":"1.0"},"data":[{"type":"users","id":20,"attributes":{"name":"Grant Owen","email":"john.doe@simpleonlinehealthcare.com","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"},"relationships":{"address":{"type":"addresses","id":1}}},{"type":"users","id":21,"attributes":{"name":"Grant Owen","email":"john.doe@simpleonlinehealthcare.com","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"},"relationships":{"address":{"type":"addresses","id":2}}}],"included":[{"type":"addresses","id":1,"attributes":{"lineOne":"Line One","lineTwo":"Line Two","postcode":"SP4 1GB","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"}},{"type":"addresses","id":2,"attributes":{"lineOne":"Test Street","lineTwo":"Banana Lane","postcode":"GB1 1SL","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"}}]}';
+        $expectedJson = '{"jsonapi":{"version":"1.0"},"data":[{"type":"users","id":20,"attributes":{"name":"Grant Owen","email":"john.doe@simpleonlinehealthcare.com","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"},"relationships":{"address":{"type":"addresses","id":1}}},{"type":"users","id":21,"attributes":{"name":"Grant Owen","email":"john.doe@simpleonlinehealthcare.com","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"},"relationships":{"address":{"type":"addresses","id":2}}}],"included":[{"type":"addresses","id":1,"attributes":{"lineOne":"Line One","lineTwo":"Line Two","postcode":"SP4 1GB","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"}},{"type":"addresses","id":2,"attributes":{"lineOne":"Test Street","lineTwo":"Banana Lane","postcode":"GB1 1SL","createdAt":"2023-06-13T15:02:08+00:00","updatedAt":"2023-06-13T15:02:08+00:00"},"relationships":{"user":{"type":"user","id":21}}}]}';
 
         $userOne = (new User())->setName('Grant Owen')
             ->setEmail('john.doe@simpleonlinehealthcare.com')
             ->setCreatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'))
             ->setUpdatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'));
 
-        $addressOne = (new Address())->setLineOne('Line One')
+        $addressOne = (new Address())->setUser($userOne)
+            ->setLineOne('Line One')
             ->setLineTwo('Line Two')
             ->setPostcode('SP4 1GB')
             ->setCreatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'))
@@ -197,7 +198,8 @@ class SerializerTest extends TestCase
             ->setCreatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'))
             ->setUpdatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'));
 
-        $addressTwo = (new Address())->setLineOne('Test Street')
+        $addressTwo = (new Address())->setUser($userTwo)
+            ->setLineOne('Test Street')
             ->setLineTwo('Banana Lane')
             ->setPostcode('GB1 1SL')
             ->setCreatedAt(Carbon::createFromTimeString('2023-06-13T15:02:08+00:00'))
