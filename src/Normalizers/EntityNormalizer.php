@@ -49,12 +49,13 @@ abstract class EntityNormalizer extends Normalizer
     {
         $attributes = $this->attributes($object);
         $relationships = $this->normalizeRelationships($this->relationships($object));
+        $shouldOmitRelations = $context['omitRelations'] ?? false;
 
         return array_filter([
             'type' => $this->resourceType,
             'id' => $this->id($object),
             'attributes' => $this->normalizeFields($attributes),
-            'relationships' => $context['omitRelations'] !== true ? $relationships : [],
+            'relationships' => $shouldOmitRelations === false ? $relationships : [],
         ]);
     }
 
