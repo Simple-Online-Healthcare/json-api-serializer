@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
+use Carbon\Carbon;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Field;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
@@ -57,6 +58,26 @@ abstract class EntityNormalizer extends Normalizer
             'attributes' => $this->normalizeFields($attributes),
             'relationships' => $shouldOmitRelations === false ? $relationships : [],
         ]);
+    }
+
+    public function denormalize(mixed $data, string $type, string $format = null, array $context = [])
+    {
+        $attributes = $data['attributes'];
+        $creatingNewEntity = ($data['id'] ?? null) === null;
+
+        $entityArray = $attributes;
+
+        if ($creatingNewEntity === false) {
+            $entityArray = [
+                ...$attributes,
+
+                'id' => $data['id'] ?? null,
+                'createdAt' => Carbon::createFromTimeString($attributes['createdAt']),
+                'updatedAt' => Carbon::createFromTimeString($attributes['updatedAt']),
+            ];
+        }
+
+        return $this->getPropertyNormalizer()->denormalize(array_filter($entityArray), $type, $format);
     }
 
     public function supportsNormalization(mixed $data, string $format = null): bool

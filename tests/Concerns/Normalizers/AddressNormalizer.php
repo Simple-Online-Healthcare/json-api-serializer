@@ -34,20 +34,4 @@ class AddressNormalizer extends EntityNormalizer
             'user' => new HasOne($entity->getUser()),
         ];
     }
-
-    public function denormalize(mixed $data, string $type, string $format = null, array $context = [])
-    {
-        $attributes = $data['attributes'];
-
-        $data = [
-            'id' => $data['id'],
-            'lineOne' => $attributes['lineOne'],
-            'lineTwo' => $attributes['lineTwo'],
-            'postcode' => $attributes['postcode'],
-            'createdAt' => Carbon::createFromTimeString($attributes['createdAt']),
-            'updatedAt' => Carbon::createFromTimeString($attributes['updatedAt']),
-        ];
-
-        return $this->getPropertyNormalizer()->denormalize($data, $type, $format);
-    }
 }

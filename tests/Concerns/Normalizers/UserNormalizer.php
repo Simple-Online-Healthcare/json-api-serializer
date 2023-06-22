@@ -2,7 +2,6 @@
 
 namespace Tests\Concerns\Normalizers;
 
-use Carbon\Carbon;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Fields\Date;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
@@ -32,20 +31,5 @@ class UserNormalizer extends EntityNormalizer
         return [
             'address' => new HasOne($entity->getAddress(), 'addresses'),
         ];
-    }
-
-    public function denormalize(mixed $data, string $type, string $format = null, array $context = [])
-    {
-        $attributes = $data['attributes'];
-
-        $data = [
-            'id' => $data['id'],
-            'name' => $attributes['name'],
-            'email' => $attributes['email'],
-            'createdAt' => Carbon::createFromTimeString($attributes['createdAt']),
-            'updatedAt' => Carbon::createFromTimeString($attributes['updatedAt']),
-        ];
-
-        return $this->getPropertyNormalizer()->denormalize($data, $type, $format);
     }
 }
