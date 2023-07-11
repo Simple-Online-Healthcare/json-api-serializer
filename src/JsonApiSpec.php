@@ -36,4 +36,9 @@ class JsonApiSpec
     {
         return $this->data;
     }
+
+    public function getIncluded(): Included
+    {
+        return $this->included;
+    }
 }

@@ -12,8 +12,10 @@ abstract class Relationship implements RelationshipContract
     /**
      * @param Entity|Entity[]|null $data
      */
-    public function __construct(protected Entity|array|null $data)
-    {
+    public function __construct(
+        protected Entity|array|null $data,
+        protected ?string $resourceType = null,
+    ) {
     }
 
     /**
@@ -22,5 +24,10 @@ abstract class Relationship implements RelationshipContract
     public function getData(): Entity|array|null
     {
         return $this->data;
+    }
+
+    public function getResourceType(): ?string
+    {
+        return $this->resourceType;
     }
 }

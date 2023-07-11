@@ -24,8 +24,9 @@ class SerializerServiceProvider extends ServiceProvider
 
         $this->app->singleton(Registry::class, function () {
             return new Registry(
-                config('json-api-serializer.jsonapi.resource_type_mapping', []),
-                config('json-api-serializer.jsonapi.transformer_mapping', []),
+                $this->app,
+                config('json-api-serializer.jsonapi.resource_types', []),
+                config('json-api-serializer.jsonapi.normalizers', []),
             );
         });
     }

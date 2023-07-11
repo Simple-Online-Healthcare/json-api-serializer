@@ -1,18 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleOnlineHealthcare\JsonApi;
 
-use SimpleOnlineHealthcare\JsonApi\Contracts\Transformer;
-use SimpleOnlineHealthcare\JsonApi\Exceptions\NoResourceTypeFoundForEntity;
+use Illuminate\Foundation\Application;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
+use SimpleOnlineHealthcare\JsonApi\Exceptions\NoResourceTypeFoundForEntity;
+
+use function array_key_exists;
+use function in_array;
+use function is_object;
 
 class Registry
 {
     public function __construct(
+        protected Application $application,
         protected array $resourceTypeMapping,
-        protected array $transformerMapping,
-        protected array $includedEntityMapping = [],
+        protected array $normalizerMapping,
+        protected array $includedEntities = [],
     ) {
+        // Instantiate the normalisers
+        $this->normalizerMapping = array_map(function (string $className) {
+            return $this->application->make($className)->setRegistry($this);
+        }, $this->normalizerMapping);
     }
 
     /**
@@ -39,30 +50,22 @@ class Registry
         return array_flip($this->resourceTypeMapping)[$resourceType];
     }
 
-    /**
-     * @param object|string $entity
-     */
-    public function findTransformerByEntity(mixed $entity): Transformer
+    public function getNormalizers(): array
     {
-        if (is_object($entity)) {
-            $entity = $entity::class;
-        }
-
-        return new $this->transformerMapping[$entity]();
+        return $this->normalizerMapping;
     }
 
-    /**
-     * @return Entity[]
-     */
     public function getIncludedEntities(): array
     {
-        return $this->includedEntityMapping;
+        return $this->includedEntities;
     }
 
-    public function addIncludedEntity(Entity $entity): self
+    public function addToIncludedEntities(Entity $entity): void
     {
-        $this->includedEntityMapping[] = $entity;
+        if (in_array($entity, $this->includedEntities, true)) {
+            return;
+        }
 
-        return $this;
+        $this->includedEntities[] = $entity;
     }
 }

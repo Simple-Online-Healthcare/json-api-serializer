@@ -4,148 +4,169 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
-use RuntimeException;
+use Carbon\Carbon;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
+use SimpleOnlineHealthcare\JsonApi\Contracts\Field;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
-use SimpleOnlineHealthcare\JsonApi\Registry;
+use SimpleOnlineHealthcare\JsonApi\Relationships\EmptyRelation;
 use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 
 use function array_key_exists;
-use function is_string;
 
-/**
- * @method getSupportedTypes(?string $format)
- */
-class EntityNormalizer implements NormalizerInterface, DenormalizerInterface
+abstract class EntityNormalizer extends Normalizer
 {
-    public function __construct(
-        protected Registry $registry,
-        protected PropertyNormalizer $propertyNormalizer,
-    ) {
+    /**
+     * @var class-string
+     */
+    protected string $entityClassName;
+
+    protected string $resourceType;
+
+    /**
+     * Returns the ID of the Entity.
+     */
+    public function id(Entity $entity): string|int
+    {
+        return $entity->getId();
     }
 
     /**
-     * @param Entity $object
+     * Returns the attributes to be shown in the JSON:API response.
      */
+    abstract public function attributes(Entity $entity): array;
+
+    /**
+     * Returns the relationships of the entity.
+     *
+     * @return Relationship[]
+     */
+    public function relationships(Entity $entity): array
+    {
+        return [];
+    }
+
     public function normalize(mixed $object, string $format = null, array $context = []): array
     {
-        $transformer = $this->getRegistry()->findTransformerByEntity($object);
-        $relationships = $transformer->relationships($object);
+        $attributes = $this->attributes($object);
+        $relationships = $this->normalizeRelationships($this->relationships($object));
+        $shouldOmitRelations = $context['omitRelations'] ?? false;
 
-        $entity = [
-            'type' => $this->getRegistry()->findResourceTypeByEntity($object),
-            'id' => $object->getId(),
-            'attributes' => $transformer->transform($object),
-            'relationships' => $this->restructureRelationships($relationships),
-        ];
+        return array_filter([
+            'type' => $this->resourceType,
+            'id' => $this->id($object),
+            'attributes' => $this->normalizeFields($attributes),
+            'relationships' => $shouldOmitRelations === false ? $relationships : [],
+        ]);
+    }
 
-        return array_filter($entity);
+    public function denormalize(mixed $data, string $type, string $format = null, array $context = [])
+    {
+        $attributes = $data['attributes'];
+        $creatingNewEntity = ($data['id'] ?? null) === null;
+
+        $entityArray = $attributes;
+
+        if ($creatingNewEntity === false) {
+            $entityArray = [
+                ...$attributes,
+
+                'id' => $data['id'] ?? null,
+                'createdAt' => Carbon::createFromTimeString($attributes['createdAt']),
+                'updatedAt' => Carbon::createFromTimeString($attributes['updatedAt']),
+            ];
+        }
+
+        return $this->getPropertyNormalizer()->denormalize(array_filter($entityArray), $type, $format);
     }
 
     public function supportsNormalization(mixed $data, string $format = null): bool
     {
-        return $data instanceof Entity;
-    }
-
-    /**
-     * @return Entity|Entity[]
-     */
-    public function denormalize(mixed $data, string $type, string $format = null, array $context = []): Entity|array
-    {
-        $data = $data['data'];
-
-        if (empty($data)) {
-            return [];
-        }
-
-        $hasOne = is_string(reset($data));
-
-        if ($hasOne === true) {
-            $data = [$data];
-        }
-
-        $resourceTypeFromJson = $data[0]['type'];
-        $entityClass = $this->getRegistry()->findEntityByResourceType($resourceTypeFromJson);
-
-        if ($entityClass !== $type) {
-            throw new RuntimeException("Class mismatch: {$entityClass} !== {$type}");
-        }
-
-        $transformer = $this->getRegistry()->findTransformerByEntity($type);
-
-        foreach ($data as $key => $value) {
-            $entity = [
-                'id' => $value['id'] ?? null,
-                ...$value['attributes'],
-            ];
-
-            $entity = [
-                ...$entity,
-                ...$transformer->beforeDenormalize($entity),
-            ];
-
-            $data[$key] = $this->getPropertyNormalizer()->denormalize(array_filter($entity), $type, $format, $context);
-        }
-
-        if ($hasOne === true) {
-            return reset($data);
-        }
-
-        return $data;
+        return $data instanceof $this->entityClassName;
     }
 
     public function supportsDenormalization(mixed $data, string $type, string $format = null): bool
     {
-        return array_key_exists('data', $data);
+        return $this->getResourceTypeFromJson($data) === $this->resourceType;
     }
 
-    protected function restructureRelationships(array $relationships): array
+    protected function getResourceTypeFromJson(array $data): ?string
     {
-        $registry = $this->getRegistry();
+        // if the data key exists, it means the main request is going to fall in here
+        // which isn't correct. only the entity JSON should ever fall in here.
+        if (array_key_exists('data', $data)) {
+            return null;
+        }
 
-        return array_map(function (Relationship $relationship) use ($registry) {
-            $hasOne = $relationship instanceof HasOne;
-            $entities = $relationship->getData();
-            $body = [];
+        if (array_key_exists('type', $data) === false) {
+            $data = reset($data);
+        }
 
-            if ($hasOne === true) {
-                $entities = [$entities];
+        return $data['type'] ?? null;
+    }
+
+    protected function normalizeFields(array $fields): array
+    {
+        return array_map(function (mixed $field) {
+            if (!$field instanceof Field) {
+                return $field;
             }
 
-            foreach ($entities as $entity) {
-                if (empty($entity)) {
-                    continue;
+            return $field->normalize();
+        }, $fields);
+    }
+
+    protected function normalizeRelationships(array $relationships): array
+    {
+        $buffer = [];
+        $relationBuffer = [];
+
+        /** @var Relationship $relationship */
+        foreach ($relationships as $key => $relationship) {
+            $hasOne = $relationship instanceof HasOne;
+            $relation = $relationship->getData();
+
+            if (empty($relation)) {
+                // This line essentially just ensures that the relationship key is always
+                // present, regardless is the relationship is empty or not.
+                $value = [];
+
+                if ($relationship instanceof HasOne) {
+                    $value = new EmptyRelation();
                 }
 
-                $registry->addIncludedEntity($entity);
+                $buffer[$key] = $value;
 
-                $body[] = [
-                    'type' => $registry->findResourceTypeByEntity($entity),
-                    'id' => $entity->getId(),
-                ];
+                continue;
             }
 
-            if ($hasOne === true) {
-                return reset($body) ?: [];
+            if ($hasOne) {
+                $relation = [$relation];
             }
 
-            return $body;
-        }, $relationships);
+            foreach ($relation as $relationItem) {
+                $relationBuffer[] = $this->structureRelationship(
+                    $relationship->getResourceType() ?? $key,
+                    $relationItem->getId()
+                );
+
+                $this->registry->addToIncludedEntities($relationItem);
+            }
+
+            if ($hasOne) {
+                $relationBuffer = reset($relationBuffer);
+            }
+
+            $buffer[$key] = $relationBuffer;
+        }
+
+        return $buffer;
     }
 
-    /**
-     * @return Registry
-     */
-    public function getRegistry(): Registry
+    protected function structureRelationship(string $resourceType, string|int $id): array
     {
-        return $this->registry;
-    }
-
-    public function getPropertyNormalizer(): PropertyNormalizer
-    {
-        return $this->propertyNormalizer;
+        return [
+            'type' => $resourceType,
+            'id' => $id,
+        ];
     }
 }
