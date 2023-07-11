@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleOnlineHealthcare\JsonApi\Fields;
 
+use DateTime;
 use DateTimeInterface;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Field;
 
@@ -20,6 +23,6 @@ class Date implements Field
 
     public function denormalize(): DateTimeInterface
     {
-        return new \DateTime();
+        return new DateTime();
     }
 }

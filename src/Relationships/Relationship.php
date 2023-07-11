@@ -26,9 +26,6 @@ abstract class Relationship implements RelationshipContract
         return $this->data;
     }
 
-    /**
-     * @return string|null
-     */
     public function getResourceType(): ?string
     {
         return $this->resourceType;

@@ -22,10 +22,10 @@ class ResponseFactory
     public function make(mixed $entities): JsonResponse
     {
         $jsonApiSpec = $this->getJsonApiSpecFactory()->make($entities);
-        
+
         $data = $this->getSerializer()->toJsonApi($jsonApiSpec);
 
-        return JsonResponse::fromJsonString($data);
+        return JsonResponse::fromJsonString($data, 200, ['Content-Type' => 'application/vnd.api+json']);
     }
 
     public function getSerializer(): Serializer
@@ -33,9 +33,6 @@ class ResponseFactory
         return $this->serializer;
     }
 
-    /**
-     * @return JsonApiSpecFactory
-     */
     public function getJsonApiSpecFactory(): JsonApiSpecFactory
     {
         return $this->jsonApiSpecFactory;

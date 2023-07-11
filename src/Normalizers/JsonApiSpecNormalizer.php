@@ -21,8 +21,7 @@ use function is_array;
 /**
  * @method getSupportedTypes(?string $format)
  */
-class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterface, NormalizerAwareInterface,
-                                       SerializerAwareInterface
+class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterface, NormalizerAwareInterface, SerializerAwareInterface
 {
     protected SerializerInterface $serializer;
     protected NormalizerInterface $normalizer;
@@ -128,7 +127,7 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
 
     protected function normalizeEntity(object $entity, string $format, array $context = []): object|array
     {
-        $entityClassName = get_class($entity);
+        $entityClassName = $entity::class;
 
         if (isset($this->cachedNormalizers) && array_key_exists($entityClassName, $this->cachedNormalizers)) {
             return $this->cachedNormalizers[$entityClassName]->normalize($entity, $format);
@@ -146,9 +145,6 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
         return $entity;
     }
 
-    /**
-     * @return Registry
-     */
     public function getRegistry(): Registry
     {
         return $this->registry;

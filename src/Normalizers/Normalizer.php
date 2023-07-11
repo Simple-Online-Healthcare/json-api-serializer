@@ -9,8 +9,6 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 
-use function array_key_exists;
-
 abstract class Normalizer implements NormalizerInterface, DenormalizerInterface
 {
     protected Registry $registry;

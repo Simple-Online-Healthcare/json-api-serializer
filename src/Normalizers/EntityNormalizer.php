@@ -11,20 +11,19 @@ use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
 use SimpleOnlineHealthcare\JsonApi\Relationships\EmptyRelation;
 use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
 
+use function array_key_exists;
+
 abstract class EntityNormalizer extends Normalizer
 {
     /**
-     * @var class-string $entityClassName
+     * @var class-string
      */
     protected string $entityClassName;
 
-    /**
-     * @var string $resourceType
-     */
     protected string $resourceType;
 
     /**
-     * Returns the ID of the Entity
+     * Returns the ID of the Entity.
      */
     public function id(Entity $entity): string|int
     {
@@ -32,12 +31,12 @@ abstract class EntityNormalizer extends Normalizer
     }
 
     /**
-     * Returns the attributes to be shown in the JSON:API response
+     * Returns the attributes to be shown in the JSON:API response.
      */
     abstract public function attributes(Entity $entity): array;
 
     /**
-     * Returns the relationships of the entity
+     * Returns the relationships of the entity.
      *
      * @return Relationship[]
      */
@@ -121,7 +120,7 @@ abstract class EntityNormalizer extends Normalizer
         $buffer = [];
         $relationBuffer = [];
 
-        /**  @var Relationship $relationship */
+        /** @var Relationship $relationship */
         foreach ($relationships as $key => $relationship) {
             $hasOne = $relationship instanceof HasOne;
             $relation = $relationship->getData();

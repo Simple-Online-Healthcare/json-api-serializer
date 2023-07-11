@@ -9,6 +9,7 @@ use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Exceptions\NoResourceTypeFoundForEntity;
 
 use function array_key_exists;
+use function in_array;
 use function is_object;
 
 class Registry
@@ -54,9 +55,6 @@ class Registry
         return $this->normalizerMapping;
     }
 
-    /**
-     * @return array
-     */
     public function getIncludedEntities(): array
     {
         return $this->includedEntities;
