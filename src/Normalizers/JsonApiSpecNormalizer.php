@@ -18,6 +18,8 @@ use Symfony\Component\Serializer\SerializerInterface;
 use function array_key_exists;
 use function is_array;
 
+use const ARRAY_FILTER_USE_BOTH;
+
 /**
  * @method getSupportedTypes(?string $format)
  */
@@ -59,7 +61,14 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
             ),
         ];
 
-        return array_filter($jsonApi + $included);
+        return array_filter($jsonApi + $included, function ($value, $key) {
+            // Never filter out the empty data array
+            if ($key === 'data') {
+                return true;
+            }
+
+            return !empty($value);
+        }, ARRAY_FILTER_USE_BOTH);
     }
 
     public function complexCallback(string $format, array $context = []): Closure
