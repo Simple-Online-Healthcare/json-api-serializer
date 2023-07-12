@@ -16,6 +16,7 @@ use Symfony\Component\Serializer\SerializerAwareInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 use function array_key_exists;
+use function in_array;
 use function is_array;
 
 use const ARRAY_FILTER_USE_BOTH;
@@ -47,7 +48,7 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
         // $value is the JsonApi, Links or Entity|Entities[] objects
         $jsonApi = array_map($this->complexCallback($format), [
             'jsonapi' => $object->getJsonapi(),
-            'links' => $object->getLinks(),
+            'links' => $object->getLinks() ?? null,
             'data' => $object->getData(),
         ]);
 
@@ -63,7 +64,7 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
 
         return array_filter($jsonApi + $included, function ($value, $key) {
             // Never filter out the empty data array
-            if ($key === 'data') {
+            if (in_array($key, ['data', 'links'])) {
                 return true;
             }
 

@@ -17,8 +17,10 @@ class JsonApiSpecFactory
     ) {
     }
 
-    public function make(mixed $data, Links $links = null): JsonApiSpec
+    public function make(mixed $data): JsonApiSpec
     {
+        $links = new Links(request()->fullUrl());
+
         return new JsonApiSpec($this->getJsonApi(), $links, $data, $this->getIncluded());
     }
 
