@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
 use Closure;
-use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
+use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
 use SimpleOnlineHealthcare\JsonApi\JsonApiSpec;
 use SimpleOnlineHealthcare\JsonApi\Registry;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -45,7 +45,7 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
      */
     public function normalize(mixed $object, string $format = null, array $context = []): array
     {
-        // $value is the JsonApi, Links or Entity|Entities[] objects
+        // $value is the JsonApi, Links or Renderable|Entities[] objects
         $jsonApi = array_map($this->complexCallback($format), [
             'jsonapi' => $object->getJsonapi(),
             'links' => $object->getLinks() ?? null,
@@ -79,10 +79,10 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
                 return [];
             }
 
-            if (is_array($value) && reset($value) instanceof Entity) {
+            if (is_array($value) && reset($value) instanceof Renderable) {
                 $value = array_map($this->complexCallback($format, $context), $value);
             } else {
-                $value = $this->normalizeEntity($value, $format, $context);
+                $value = $this->normalizeRenderable($value, $format, $context);
             }
 
             if (is_array($value)) {
@@ -101,9 +101,9 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
     }
 
     /**
-     * @return Entity|Entity[]
+     * @return Renderable|Renderable[]
      */
-    public function denormalize(mixed $data, string $type, string $format = null, array $context = []): Entity|array
+    public function denormalize(mixed $data, string $type, string $format = null, array $context = []): Renderable|array
     {
         $dataFromJsonApi = $data['data'];
         $hasOne = array_key_exists('type', $dataFromJsonApi);
@@ -135,24 +135,24 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
                 || array_key_exists('type', $firstValueInInnerData));
     }
 
-    protected function normalizeEntity(object $entity, string $format, array $context = []): object|array
+    protected function normalizeRenderable(object $renderable, string $format, array $context = []): object|array
     {
-        $entityClassName = $entity::class;
+        $renderableClassName = $renderable::class;
 
-        if (isset($this->cachedNormalizers) && array_key_exists($entityClassName, $this->cachedNormalizers)) {
-            return $this->cachedNormalizers[$entityClassName]->normalize($entity, $format);
+        if (isset($this->cachedNormalizers) && array_key_exists($renderableClassName, $this->cachedNormalizers)) {
+            return $this->cachedNormalizers[$renderableClassName]->normalize($renderable, $format);
         }
 
         /** @var NormalizerInterface $normalizer */
         foreach ($this->getRegistry()->getNormalizers() as $normalizer) {
-            if ($normalizer->supportsNormalization($entity, $format)) {
-                $this->cachedNormalizers[$entityClassName] = $normalizer;
+            if ($normalizer->supportsNormalization($renderable, $format)) {
+                $this->cachedNormalizers[$renderableClassName] = $normalizer;
 
-                return $normalizer->normalize($entity, $format, $context);
+                return $normalizer->normalize($renderable, $format, $context);
             }
         }
 
-        return $entity;
+        return $renderable;
     }
 
     public function getRegistry(): Registry

@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi;
 
-use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Included;
 use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
+use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
 
 class JsonApiSpec
 {
     /**
-     * @param Entity|Entity[] $data
+     * @param Renderable|Renderable[] $data
      */
     public function __construct(
         protected JsonApi $jsonapi,
         protected ?Links $links,
-        protected Entity|array $data,
+        protected Renderable|array $data,
         protected Included $included,
     ) {
     }
@@ -32,7 +32,7 @@ class JsonApiSpec
         return $this->links;
     }
 
-    public function getData(): Entity|array
+    public function getData(): Renderable|array
     {
         return $this->data;
     }
