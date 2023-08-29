@@ -118,10 +118,11 @@ abstract class EntityNormalizer extends Normalizer
     protected function normalizeRelationships(array $relationships): array
     {
         $buffer = [];
-        $relationBuffer = [];
 
         /** @var Relationship $relationship */
         foreach ($relationships as $key => $relationship) {
+            $relationBuffer = [];
+            
             $hasOne = $relationship instanceof HasOne;
             $relation = $relationship->getData();
 
