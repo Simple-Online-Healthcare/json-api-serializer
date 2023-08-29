@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi;
 
+use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
 use SimpleOnlineHealthcare\JsonApi\Factories\JsonApiSpecFactory;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\JsonApiSpecNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer as BaseSerializer;
@@ -43,9 +45,12 @@ class Serializer
         );
     }
 
-    public function fromJsonApi(string $json, string $class)
+    public function fromJsonApi(string $json, string $class, ?Renderable $objectToPopulate = null)
     {
-        return $this->getSerializer()->deserialize($json, $class, JsonEncoder::FORMAT);
+        return $this->getSerializer()->deserialize($json, $class, JsonEncoder::FORMAT, [
+            AbstractNormalizer::OBJECT_TO_POPULATE => $objectToPopulate,
+            // AbstractObjectNormalizer::DEEP_OBJECT_TO_POPULATE => true,
+        ]);
     }
 
     public function getSerializer(): BaseSerializer
