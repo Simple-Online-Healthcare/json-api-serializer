@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
-use Carbon\Carbon;
 use Error;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Field;
@@ -88,8 +87,11 @@ abstract class RenderableNormalizer extends Normalizer
                 ...$attributes,
 
                 'id' => $data['id'] ?? null,
-                'createdAt' => Carbon::createFromTimeString($attributes['createdAt']),
-                'updatedAt' => Carbon::createFromTimeString($attributes['updatedAt']),
+
+                // Should we really parse the timestamps from the client?
+
+                // 'createdAt' => Carbon::createFromTimeString($attributes['createdAt']),
+                // 'updatedAt' => Carbon::createFromTimeString($attributes['updatedAt']),
             ];
         }
 
