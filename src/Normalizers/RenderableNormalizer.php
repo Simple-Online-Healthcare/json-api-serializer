@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
 use Error;
+use RuntimeException;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Field;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
@@ -12,11 +13,16 @@ use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
 use SimpleOnlineHealthcare\JsonApi\Exceptions\InvalidRenderableIdImplementation;
 use SimpleOnlineHealthcare\JsonApi\Relationships\EmptyRelation;
 use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\SerializerAwareInterface;
+use Symfony\Component\Serializer\SerializerAwareTrait;
 
 use function array_key_exists;
 
-abstract class RenderableNormalizer extends Normalizer
+abstract class RenderableNormalizer extends Normalizer implements SerializerAwareInterface
 {
+    use SerializerAwareTrait;
+
     public const OMIT_ID = 'omit_id';
 
     /**
@@ -77,21 +83,34 @@ abstract class RenderableNormalizer extends Normalizer
 
     public function denormalize(mixed $data, string $type, string $format = null, array $context = [])
     {
+        $id = $data['id'];
         $attributes = $data['attributes'];
-        $creatingNewEntity = ($data['id'] ?? null) === null;
+
+        $creatingNewEntity = ($id ?? null) === null;
 
         $renderableArray = $attributes;
 
         if ($creatingNewEntity === false) {
+            $objectToPopulate = $context[AbstractNormalizer::OBJECT_TO_POPULATE] ?? [];
+
+            if (!empty($objectToPopulate)) {
+                if ($objectToPopulate instanceof Entity) {
+                    if ($objectToPopulate->getId() !== (int)$id) {
+                        throw new RuntimeException('id mismatch');
+                    }
+                }
+
+                $propertyNormalizer = $this->getPropertyNormalizer();
+
+                $propertyNormalizer->setSerializer($this->serializer);
+                $objectToPopulate = $propertyNormalizer->normalize($objectToPopulate);
+            }
+
             $renderableArray = [
+                ...$objectToPopulate,
                 ...$attributes,
 
-                'id' => $data['id'] ?? null,
-
-                // Should we really parse the timestamps from the client?
-
-                // 'createdAt' => Carbon::createFromTimeString($attributes['createdAt']),
-                // 'updatedAt' => Carbon::createFromTimeString($attributes['updatedAt']),
+                'id' => $id ?? null,
             ];
         }
 
