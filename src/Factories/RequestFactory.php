@@ -14,6 +14,11 @@ class RequestFactory extends SchemaFactory
      */
     public function make(mixed $entities): string
     {
-        return parent::toJsonApi($entities, [RenderableNormalizer::OMIT_ID => true]);
+        $jsonApiString = parent::toJsonApi($entities, [RenderableNormalizer::OMIT_ID => true]);
+        $jsonApi = json_decode($jsonApiString, true);
+
+        $data = $jsonApi['data'] ?? [];
+
+        return json_encode(['data' => $data]);
     }
 }
