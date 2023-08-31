@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
 use Carbon\Carbon;
+use Error;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Field;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
@@ -17,6 +18,8 @@ use function array_key_exists;
 
 abstract class RenderableNormalizer extends Normalizer
 {
+    public const OMIT_ID = 'omit_id';
+
     /**
      * @var class-string $renderableClassName
      */
@@ -27,10 +30,18 @@ abstract class RenderableNormalizer extends Normalizer
     /**
      * Returns the ID of the Entity.
      */
-    public function id(Renderable $renderable): string|int
+    public function id(Renderable $renderable, bool $omitId = false): string|int
     {
         if ($renderable instanceof Entity) {
-            return $renderable->getId();
+            try {
+                return $renderable->getId();
+            } catch (Error $error) {
+                if ($omitId === true) {
+                    return 0;
+                }
+
+                throw $error;
+            }
         }
 
         throw new InvalidRenderableIdImplementation();
@@ -59,7 +70,7 @@ abstract class RenderableNormalizer extends Normalizer
 
         return array_filter([
             'type' => $this->resourceType,
-            'id' => $this->id($object),
+            'id' => $this->id($object, $context[self::OMIT_ID] ?? false),
             'attributes' => $this->normalizeFields($attributes),
             'relationships' => $shouldOmitRelations === false ? $relationships : [],
         ]);
