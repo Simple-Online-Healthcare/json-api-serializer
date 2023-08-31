@@ -2,36 +2,35 @@
 
 namespace Tests\Concerns\Normalizers;
 
-use Carbon\Carbon;
-use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
+use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
 use SimpleOnlineHealthcare\JsonApi\Fields\Date;
-use SimpleOnlineHealthcare\JsonApi\Normalizers\EntityNormalizer;
+use SimpleOnlineHealthcare\JsonApi\Normalizers\RenderableNormalizer;
 use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
 use Tests\Concerns\Entities\Address;
 
 /**
  * @method  getSupportedTypes(?string $format)
  */
-class AddressNormalizer extends EntityNormalizer
+class AddressNormalizer extends RenderableNormalizer
 {
-    protected string $entityClassName = Address::class;
+    protected string $renderableClassName = Address::class;
     protected string $resourceType = 'addresses';
 
-    public function attributes(Address|Entity $entity): array
+    public function attributes(Address|Renderable $renderable): array
     {
         return [
-            'lineOne' => $entity->getLineOne(),
-            'lineTwo' => $entity->getLineTwo(),
-            'postcode' => $entity->getPostcode(),
-            'createdAt' => new Date($entity->getCreatedAt()),
-            'updatedAt' => new Date($entity->getUpdatedAt()),
+            'lineOne' => $renderable->getLineOne(),
+            'lineTwo' => $renderable->getLineTwo(),
+            'postcode' => $renderable->getPostcode(),
+            'createdAt' => new Date($renderable->getCreatedAt()),
+            'updatedAt' => new Date($renderable->getUpdatedAt()),
         ];
     }
 
-    public function relationships(Address|Entity $entity): array
+    public function relationships(Address|Renderable $renderable): array
     {
         return [
-            'user' => new HasOne($entity->getUser()),
+            'user' => new HasOne($renderable->getUser()),
         ];
     }
 }

@@ -3,8 +3,9 @@
 namespace Tests\Concerns\Entities;
 
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
+use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
 
-class Address implements Entity
+class Address implements Entity, Renderable
 {
     use Timestamps;
 

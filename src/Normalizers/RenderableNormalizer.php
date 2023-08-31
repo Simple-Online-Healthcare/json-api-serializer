@@ -8,39 +8,45 @@ use Carbon\Carbon;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Field;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
+use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
+use SimpleOnlineHealthcare\JsonApi\Exceptions\InvalidRenderableIdImplementation;
 use SimpleOnlineHealthcare\JsonApi\Relationships\EmptyRelation;
 use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
 
 use function array_key_exists;
 
-abstract class EntityNormalizer extends Normalizer
+abstract class RenderableNormalizer extends Normalizer
 {
     /**
-     * @var class-string
+     * @var class-string $renderableClassName
      */
-    protected string $entityClassName;
+    protected string $renderableClassName;
 
     protected string $resourceType;
 
     /**
      * Returns the ID of the Entity.
      */
-    public function id(Entity $entity): string|int
+    public function id(Renderable $renderable): string|int
     {
-        return $entity->getId();
+        if ($renderable instanceof Entity) {
+            return $renderable->getId();
+        }
+
+        throw new InvalidRenderableIdImplementation();
     }
 
     /**
      * Returns the attributes to be shown in the JSON:API response.
      */
-    abstract public function attributes(Entity $entity): array;
+    abstract public function attributes(Renderable $renderable): array;
 
     /**
      * Returns the relationships of the entity.
      *
      * @return Relationship[]
      */
-    public function relationships(Entity $entity): array
+    public function relationships(Renderable $renderable): array
     {
         return [];
     }
@@ -64,10 +70,10 @@ abstract class EntityNormalizer extends Normalizer
         $attributes = $data['attributes'];
         $creatingNewEntity = ($data['id'] ?? null) === null;
 
-        $entityArray = $attributes;
+        $renderableArray = $attributes;
 
         if ($creatingNewEntity === false) {
-            $entityArray = [
+            $renderableArray = [
                 ...$attributes,
 
                 'id' => $data['id'] ?? null,
@@ -76,12 +82,12 @@ abstract class EntityNormalizer extends Normalizer
             ];
         }
 
-        return $this->getPropertyNormalizer()->denormalize(array_filter($entityArray), $type, $format);
+        return $this->getPropertyNormalizer()->denormalize(array_filter($renderableArray), $type, $format);
     }
 
     public function supportsNormalization(mixed $data, string $format = null): bool
     {
-        return $data instanceof $this->entityClassName;
+        return $data instanceof $this->renderableClassName;
     }
 
     public function supportsDenormalization(mixed $data, string $type, string $format = null): bool
@@ -122,7 +128,7 @@ abstract class EntityNormalizer extends Normalizer
         /** @var Relationship $relationship */
         foreach ($relationships as $key => $relationship) {
             $relationBuffer = [];
-            
+
             $hasOne = $relationship instanceof HasOne;
             $relation = $relationship->getData();
 
