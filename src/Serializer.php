@@ -11,6 +11,7 @@ use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer as BaseSerializer;
 
@@ -28,6 +29,7 @@ class Serializer
 
         $normalizers = $this->getRegistry()->getNormalizers() + [
                 new JsonApiSpecNormalizer($this->getRegistry(), new ObjectNormalizer()),
+                new DateTimeNormalizer(),
             ];
 
         $this->serializer = new BaseSerializer($normalizers, $encoders);
