@@ -93,8 +93,14 @@ abstract class RenderableNormalizer extends Normalizer implements SerializerAwar
         if ($creatingNewEntity === false) {
             $objectToPopulate = $context[AbstractNormalizer::OBJECT_TO_POPULATE] ?? [];
 
+            // One of the issues with the $objectToPopulate is that we don't really know
+            // what data types it's properties are going to be. We have to get the object,
+            // normalize it so we have all the properties ain an array. After, we'll need to
+            // convert it back to an object so it can be returned to the parent function.
             if (!empty($objectToPopulate)) {
                 if ($objectToPopulate instanceof Entity) {
+                    // Within the main application, the developer will still need to check the `id`
+                    // in the JSON:API document is the same as the `id` in the path.
                     if ($objectToPopulate->getId() !== (int)$id) {
                         throw new RuntimeException('id mismatch');
                     }
@@ -111,6 +117,8 @@ abstract class RenderableNormalizer extends Normalizer implements SerializerAwar
                 ...$attributes,
 
                 'id' => $id ?? null,
+                'createdAt' => \DateTime::createFromFormat(\DateTime::RFC3339, $objectToPopulate['createdAt']),
+                'updatedAt' => \DateTime::createFromFormat(\DateTime::RFC3339, $objectToPopulate['updatedAt']),
             ];
         }
 
