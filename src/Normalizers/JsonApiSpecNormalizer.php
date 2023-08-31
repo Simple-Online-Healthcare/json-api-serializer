@@ -47,7 +47,7 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
     public function normalize(mixed $object, string $format = null, array $context = []): array
     {
         // $value is the JsonApi, Links or Renderable|Entities[] objects
-        $jsonApi = array_map($this->complexCallback($format), [
+        $jsonApi = array_map($this->complexCallback($format, $context), [
             'jsonapi' => $object->getJsonapi(),
             'links' => $object->getLinks() ?? null,
             'data' => $object->getData(),
