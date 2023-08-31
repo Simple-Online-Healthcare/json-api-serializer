@@ -83,10 +83,10 @@ abstract class RenderableNormalizer extends Normalizer implements SerializerAwar
 
     public function denormalize(mixed $data, string $type, string $format = null, array $context = [])
     {
-        $id = $data['id'];
+        $id = $data['id'] ?? null;
         $attributes = $data['attributes'];
 
-        $creatingNewEntity = ($id ?? null) === null;
+        $creatingNewEntity = $id === null;
 
         $renderableArray = $attributes;
 
