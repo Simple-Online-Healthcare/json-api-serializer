@@ -33,7 +33,7 @@ class Serializer
         $this->serializer = new BaseSerializer($normalizers, $encoders);
     }
 
-    public function toJsonApi(JsonApiSpec $jsonApiSpec): string
+    public function toJsonApi(JsonApiSpec $jsonApiSpec, array $context = []): string
     {
         return $this->getSerializer()->serialize(
             $jsonApiSpec,
@@ -41,6 +41,9 @@ class Serializer
             [
                 JsonEncode::OPTIONS => JSON_UNESCAPED_UNICODE,
                 AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+
+                // Allow the above values to be overwritten.
+                ...$context,
             ]
         );
     }
