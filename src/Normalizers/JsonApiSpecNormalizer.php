@@ -24,7 +24,8 @@ use const ARRAY_FILTER_USE_BOTH;
 /**
  * @method getSupportedTypes(?string $format)
  */
-class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterface, NormalizerAwareInterface, SerializerAwareInterface
+class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterface, NormalizerAwareInterface,
+                                       SerializerAwareInterface
 {
     protected SerializerInterface $serializer;
     protected NormalizerInterface $normalizer;
@@ -46,7 +47,7 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
     public function normalize(mixed $object, string $format = null, array $context = []): array
     {
         // $value is the JsonApi, Links or Renderable|Entities[] objects
-        $jsonApi = array_map($this->complexCallback($format), [
+        $jsonApi = array_map($this->complexCallback($format, $context), [
             'jsonapi' => $object->getJsonapi(),
             'links' => $object->getLinks() ?? null,
             'data' => $object->getData(),
@@ -90,7 +91,7 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
             }
 
             return array_filter(
-                $this->getObjectNormalizer()->normalize($value, 'json')
+                $this->getObjectNormalizer()->normalize($value, 'json', $context)
             );
         };
     }
@@ -112,17 +113,17 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
             $dataFromJsonApi = [$dataFromJsonApi];
         }
 
-        $denormalisedData = array_map(function (array $data) use ($type) {
+        $denormalizedData = array_map(function (array $data) use ($type, $context) {
             $encodedData = json_encode($data);
 
-            return $this->getSerializer()->deserialize($encodedData, $type, 'json');
+            return $this->getSerializer()->deserialize($encodedData, $type, 'json', $context);
         }, $dataFromJsonApi);
 
         if ($hasOne) {
-            return reset($denormalisedData);
+            return reset($denormalizedData);
         }
 
-        return $denormalisedData;
+        return $denormalizedData;
     }
 
     public function supportsDenormalization(mixed $data, string $type, string $format = null): bool

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi\Normalizers;
 
-use Carbon\Carbon;
+use Error;
+use RuntimeException;
 use SimpleOnlineHealthcare\Contracts\Doctrine\Entity;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Field;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Relationship;
@@ -12,11 +13,18 @@ use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
 use SimpleOnlineHealthcare\JsonApi\Exceptions\InvalidRenderableIdImplementation;
 use SimpleOnlineHealthcare\JsonApi\Relationships\EmptyRelation;
 use SimpleOnlineHealthcare\JsonApi\Relationships\HasOne;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\SerializerAwareInterface;
+use Symfony\Component\Serializer\SerializerAwareTrait;
 
 use function array_key_exists;
 
-abstract class RenderableNormalizer extends Normalizer
+abstract class RenderableNormalizer extends Normalizer implements SerializerAwareInterface
 {
+    use SerializerAwareTrait;
+
+    public const OMIT_ID = 'omit_id';
+
     /**
      * @var class-string $renderableClassName
      */
@@ -27,10 +35,18 @@ abstract class RenderableNormalizer extends Normalizer
     /**
      * Returns the ID of the Entity.
      */
-    public function id(Renderable $renderable): string|int
+    public function id(Renderable $renderable, bool $omitId = false): string|int
     {
         if ($renderable instanceof Entity) {
-            return $renderable->getId();
+            try {
+                return $renderable->getId();
+            } catch (Error $error) {
+                if ($omitId === true) {
+                    return 0;
+                }
+
+                throw $error;
+            }
         }
 
         throw new InvalidRenderableIdImplementation();
@@ -59,7 +75,7 @@ abstract class RenderableNormalizer extends Normalizer
 
         return array_filter([
             'type' => $this->resourceType,
-            'id' => $this->id($object),
+            'id' => $this->id($object, $context[self::OMIT_ID] ?? false),
             'attributes' => $this->normalizeFields($attributes),
             'relationships' => $shouldOmitRelations === false ? $relationships : [],
         ]);
@@ -67,18 +83,42 @@ abstract class RenderableNormalizer extends Normalizer
 
     public function denormalize(mixed $data, string $type, string $format = null, array $context = [])
     {
+        $id = $data['id'] ?? null;
         $attributes = $data['attributes'];
-        $creatingNewEntity = ($data['id'] ?? null) === null;
+
+        $creatingNewEntity = $id === null;
 
         $renderableArray = $attributes;
 
         if ($creatingNewEntity === false) {
+            $objectToPopulate = $context[AbstractNormalizer::OBJECT_TO_POPULATE] ?? [];
+
+            // One of the issues with the $objectToPopulate is that we don't really know
+            // what data types it's properties are going to be. We have to get the object,
+            // normalize it so we have all the properties ain an array. After, we'll need to
+            // convert it back to an object so it can be returned to the parent function.
+            if (!empty($objectToPopulate)) {
+                if ($objectToPopulate instanceof Entity) {
+                    // Within the main application, the developer will still need to check the `id`
+                    // in the JSON:API document is the same as the `id` in the path.
+                    if ($objectToPopulate->getId() !== (int)$id) {
+                        throw new RuntimeException('id mismatch');
+                    }
+                }
+
+                $propertyNormalizer = $this->getPropertyNormalizer();
+
+                $propertyNormalizer->setSerializer($this->serializer);
+                $objectToPopulate = $propertyNormalizer->normalize($objectToPopulate);
+            }
+
             $renderableArray = [
+                ...$objectToPopulate,
                 ...$attributes,
 
-                'id' => $data['id'] ?? null,
-                'createdAt' => Carbon::createFromTimeString($attributes['createdAt']),
-                'updatedAt' => Carbon::createFromTimeString($attributes['updatedAt']),
+                'id' => $id ?? null,
+                'createdAt' => \DateTime::createFromFormat(\DateTime::RFC3339, $objectToPopulate['createdAt']),
+                'updatedAt' => \DateTime::createFromFormat(\DateTime::RFC3339, $objectToPopulate['updatedAt']),
             ];
         }
 

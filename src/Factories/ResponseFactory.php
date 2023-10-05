@@ -6,35 +6,16 @@ namespace SimpleOnlineHealthcare\JsonApi\Factories;
 
 use Illuminate\Http\JsonResponse;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
-use SimpleOnlineHealthcare\JsonApi\Serializer;
 
-class ResponseFactory
+class ResponseFactory extends SchemaFactory
 {
-    public function __construct(
-        protected Serializer $serializer,
-        protected JsonApiSpecFactory $jsonApiSpecFactory,
-    ) {
-    }
-
     /**
      * @param Renderable|Renderable[] $entities
      */
     public function make(mixed $entities): JsonResponse
     {
-        $jsonApiSpec = $this->getJsonApiSpecFactory()->make($entities);
-
-        $data = $this->getSerializer()->toJsonApi($jsonApiSpec);
+        $data = parent::toJsonApi($entities);
 
         return JsonResponse::fromJsonString($data, 200, ['Content-Type' => 'application/vnd.api+json']);
-    }
-
-    public function getSerializer(): Serializer
-    {
-        return $this->serializer;
-    }
-
-    public function getJsonApiSpecFactory(): JsonApiSpecFactory
-    {
-        return $this->jsonApiSpecFactory;
     }
 }
