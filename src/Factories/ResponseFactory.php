@@ -6,6 +6,7 @@ namespace SimpleOnlineHealthcare\JsonApi\Factories;
 
 use Illuminate\Http\JsonResponse;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
+use Symfony\Component\HttpFoundation\Response;
 
 class ResponseFactory extends SchemaFactory
 {
@@ -17,5 +18,10 @@ class ResponseFactory extends SchemaFactory
         $data = parent::toJsonApi($entities);
 
         return JsonResponse::fromJsonString($data, $statusCode, ['Content-Type' => 'application/vnd.api+json']);
+    }
+
+    public function empty(): JsonResponse
+    {
+        return (new JsonResponse())->setStatusCode(Response::HTTP_NO_CONTENT);
     }
 }
