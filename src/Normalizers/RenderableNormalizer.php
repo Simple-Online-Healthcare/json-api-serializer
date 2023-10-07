@@ -117,9 +117,15 @@ abstract class RenderableNormalizer extends Normalizer implements SerializerAwar
                 ...$attributes,
 
                 'id' => $id ?? null,
-                'createdAt' => \DateTime::createFromFormat(\DateTime::RFC3339, $objectToPopulate['createdAt']),
-                'updatedAt' => \DateTime::createFromFormat(\DateTime::RFC3339, $objectToPopulate['updatedAt']),
             ];
+
+            if (($createdAt = $objectToPopulate['createdAt'] ?? null) && !empty($createdAt)) {
+                $renderableArray['createdAt'] = $createdAt;
+            }
+
+            if (($updatedAt = $objectToPopulate['updatedAt'] ?? null) && !empty($updatedAt)) {
+                $renderableArray['updatedAt'] = $updatedAt;
+            }
         }
 
         return $this->getPropertyNormalizer()->denormalize(array_filter($renderableArray), $type, $format);
