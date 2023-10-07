@@ -39,7 +39,7 @@ abstract class RenderableNormalizer extends Normalizer implements SerializerAwar
     {
         if ($renderable instanceof Entity) {
             try {
-                return $renderable->getId();
+                return (string)$renderable->getId();
             } catch (Error $error) {
                 if ($omitId === true) {
                     return 0;
