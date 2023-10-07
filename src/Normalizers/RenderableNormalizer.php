@@ -85,6 +85,7 @@ abstract class RenderableNormalizer extends Normalizer implements SerializerAwar
     {
         $id = $data['id'] ?? null;
         $attributes = $data['attributes'];
+        $objectToPopulate = [];
 
         $creatingNewEntity = $id === null;
 
@@ -92,10 +93,11 @@ abstract class RenderableNormalizer extends Normalizer implements SerializerAwar
 
         if ($creatingNewEntity === false) {
             $objectToPopulate = $context[AbstractNormalizer::OBJECT_TO_POPULATE] ?? [];
+            $normalizedObjectToPopulate = [];
 
             // One of the issues with the $objectToPopulate is that we don't really know
-            // what data types it's properties are going to be. We have to get the object,
-            // normalize it so we have all the properties ain an array. After, we'll need to
+            // what data types its properties are going to be. We have to get the object,
+            // normalize it so we have all the properties in an array. After, we'll need to
             // convert it back to an object so it can be returned to the parent function.
             if (!empty($objectToPopulate)) {
                 if ($objectToPopulate instanceof Entity) {
@@ -109,26 +111,31 @@ abstract class RenderableNormalizer extends Normalizer implements SerializerAwar
                 $propertyNormalizer = $this->getPropertyNormalizer();
 
                 $propertyNormalizer->setSerializer($this->serializer);
-                $objectToPopulate = $propertyNormalizer->normalize($objectToPopulate);
+                $normalizedObjectToPopulate = $propertyNormalizer->normalize($objectToPopulate);
             }
 
             $renderableArray = [
-                ...$objectToPopulate,
+                ...$normalizedObjectToPopulate,
                 ...$attributes,
 
                 'id' => $id ?? null,
             ];
 
-            if (($createdAt = $objectToPopulate['createdAt'] ?? null) && !empty($createdAt)) {
+            if (($createdAt = $normalizedObjectToPopulate['createdAt'] ?? null) && !empty($createdAt)) {
                 $renderableArray['createdAt'] = $createdAt;
             }
 
-            if (($updatedAt = $objectToPopulate['updatedAt'] ?? null) && !empty($updatedAt)) {
+            if (($updatedAt = $normalizedObjectToPopulate['updatedAt'] ?? null) && !empty($updatedAt)) {
                 $renderableArray['updatedAt'] = $updatedAt;
             }
         }
 
-        return $this->getPropertyNormalizer()->denormalize(array_filter($renderableArray), $type, $format);
+        return $this->getPropertyNormalizer()->denormalize(
+            array_filter($renderableArray),
+            $type,
+            $format,
+            [AbstractNormalizer::OBJECT_TO_POPULATE => $objectToPopulate]
+        );
     }
 
     public function supportsNormalization(mixed $data, string $format = null): bool
