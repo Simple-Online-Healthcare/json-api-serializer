@@ -19,6 +19,6 @@ class RequestFactory extends SchemaFactory
 
         $data = $jsonApi['data'] ?? [];
 
-        return json_encode(['data' => $data]);
+        return json_encode(['data' => $data], JSON_PRESERVE_ZERO_FRACTION);
     }
 }

@@ -42,7 +42,7 @@ class Serializer
             $jsonApiSpec,
             JsonEncoder::FORMAT,
             [
-                JsonEncode::OPTIONS => JSON_UNESCAPED_UNICODE,
+                JsonEncode::OPTIONS => JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION,
                 AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
 
                 // Allow the above values to be overwritten.
