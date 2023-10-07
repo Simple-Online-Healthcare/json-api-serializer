@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleOnlineHealthcare\JsonApi;
 
 use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
+use SimpleOnlineHealthcare\JsonApi\Exceptions\InvalidJsonApiDocument;
 use SimpleOnlineHealthcare\JsonApi\Factories\JsonApiSpecFactory;
 use SimpleOnlineHealthcare\JsonApi\Normalizers\JsonApiSpecNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
@@ -50,12 +51,30 @@ class Serializer
         );
     }
 
-    public function fromJsonApi(string $json, string $class, ?Renderable $objectToPopulate = null)
+    public function fromJsonApi(string $json, ?string $class = null, ?Renderable $objectToPopulate = null)
     {
+        if (empty($class)) {
+            $class = $this->guessRenderableClassName($json);
+        }
+
         return $this->getSerializer()->deserialize($json, $class, JsonEncoder::FORMAT, [
             AbstractNormalizer::OBJECT_TO_POPULATE => $objectToPopulate,
             // AbstractObjectNormalizer::DEEP_OBJECT_TO_POPULATE => true,
         ]);
+    }
+
+    protected function guessRenderableClassName(string $json): string
+    {
+        $decoded = json_decode($json, true);
+
+        if (empty($decoded['data'])) {
+            throw new InvalidJsonApiDocument();
+        }
+
+        $data = $decoded['data'];
+        $resourceType = $data['type'] ?? $data[0]['type'];
+
+        return $this->registry->getEntityByResourceType($resourceType);
     }
 
     public function getSerializer(): BaseSerializer
