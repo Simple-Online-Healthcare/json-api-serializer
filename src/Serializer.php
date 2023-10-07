@@ -63,7 +63,7 @@ class Serializer
         ]);
     }
 
-    protected function guessRenderableClassName(string $json): string
+    public function guessRenderableClassName(string $json): string
     {
         $decoded = json_decode($json, true);
 
