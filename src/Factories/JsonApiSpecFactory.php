@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleOnlineHealthcare\JsonApi\Factories;
 
+use Generator;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Included;
 use SimpleOnlineHealthcare\JsonApi\Concerns\JsonApi;
 use SimpleOnlineHealthcare\JsonApi\Concerns\Links;
@@ -20,6 +21,10 @@ class JsonApiSpecFactory
     public function make(mixed $data): JsonApiSpec
     {
         $links = new Links(request()->fullUrl());
+
+        if ($data instanceof Generator) {
+            $data = iterator_to_array($data);
+        }
 
         return new JsonApiSpec($this->getJsonApi(), $links, $data, $this->getIncluded());
     }

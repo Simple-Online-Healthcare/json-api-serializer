@@ -24,7 +24,7 @@
     }
   },
   "require": {
-    "laravel/framework": "^9.19",
+    "laravel/framework": "^9.19|^10.10",
     "simple-online-healthcare/contracts": "^1.5.0",
     "symfony/serializer": "^6.3",
     "symfony/property-access": "^6.3"

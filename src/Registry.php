@@ -50,6 +50,16 @@ class Registry
         return array_flip($this->resourceTypeMapping)[$resourceType];
     }
 
+    public function getResourceTypeMapping(): array
+    {
+        return $this->resourceTypeMapping;
+    }
+
+    public function getEntityByResourceType(string $resourceType): string
+    {
+        return array_flip($this->getResourceTypeMapping())[$resourceType];
+    }
+
     public function getNormalizers(): array
     {
         return $this->normalizerMapping;

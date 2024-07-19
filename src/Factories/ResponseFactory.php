@@ -6,35 +6,22 @@ namespace SimpleOnlineHealthcare\JsonApi\Factories;
 
 use Illuminate\Http\JsonResponse;
 use SimpleOnlineHealthcare\JsonApi\Contracts\Renderable;
-use SimpleOnlineHealthcare\JsonApi\Serializer;
+use Symfony\Component\HttpFoundation\Response;
 
-class ResponseFactory
+class ResponseFactory extends SchemaFactory
 {
-    public function __construct(
-        protected Serializer $serializer,
-        protected JsonApiSpecFactory $jsonApiSpecFactory,
-    ) {
-    }
-
     /**
      * @param Renderable|Renderable[] $entities
      */
-    public function make(mixed $entities): JsonResponse
+    public function make(mixed $entities, int $statusCode = 200): JsonResponse
     {
-        $jsonApiSpec = $this->getJsonApiSpecFactory()->make($entities);
+        $data = parent::toJsonApi($entities);
 
-        $data = $this->getSerializer()->toJsonApi($jsonApiSpec);
-
-        return JsonResponse::fromJsonString($data, 200, ['Content-Type' => 'application/vnd.api+json']);
+        return JsonResponse::fromJsonString($data, $statusCode, ['Content-Type' => 'application/vnd.api+json']);
     }
 
-    public function getSerializer(): Serializer
+    public function empty(): JsonResponse
     {
-        return $this->serializer;
-    }
-
-    public function getJsonApiSpecFactory(): JsonApiSpecFactory
-    {
-        return $this->jsonApiSpecFactory;
+        return (new JsonResponse())->setStatusCode(Response::HTTP_NO_CONTENT);
     }
 }
