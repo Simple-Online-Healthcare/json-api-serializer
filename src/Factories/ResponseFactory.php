@@ -19,9 +19,9 @@ class ResponseFactory
     /**
      * @param Renderable|Renderable[] $entities
      */
-    public function make(mixed $entities): JsonResponse
+    public function make(mixed $entities, array $links = [], array $meta = []): JsonResponse
     {
-        $jsonApiSpec = $this->getJsonApiSpecFactory()->make($entities);
+        $jsonApiSpec = $this->getJsonApiSpecFactory()->make($entities, $links, $meta);
 
         $data = $this->getSerializer()->toJsonApi($jsonApiSpec);
 
