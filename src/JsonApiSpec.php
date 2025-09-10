@@ -19,6 +19,7 @@ class JsonApiSpec
         protected ?Links $links,
         protected Renderable|array $data,
         protected Included $included,
+        protected array $meta = [],
     ) {
     }
 
@@ -40,5 +41,10 @@ class JsonApiSpec
     public function getIncluded(): Included
     {
         return $this->included;
+    }
+
+    public function getMeta(): array
+    {
+        return $this->meta;
     }
 }

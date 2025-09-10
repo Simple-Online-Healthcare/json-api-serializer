@@ -48,7 +48,8 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
         // $value is the JsonApi, Links or Renderable|Entities[] objects
         $jsonApi = array_map($this->complexCallback($format), [
             'jsonapi' => $object->getJsonapi(),
-            'links' => $object->getLinks() ?? null,
+            'links' => $object->getLinks() ? $object->getLinks()->all() : null,
+            'meta' => $object->getMeta(),
             'data' => $object->getData(),
         ]);
 
@@ -79,8 +80,13 @@ class JsonApiSpecNormalizer implements NormalizerInterface, DenormalizerInterfac
                 return [];
             }
 
-            if (is_array($value) && reset($value) instanceof Renderable) {
-                $value = array_map($this->complexCallback($format, $context), $value);
+           if (is_array($value)) {
+                if (reset($value) instanceof Renderable) {
+                    $value = array_map($this->complexCallback($format, $context), $value);
+                } else {
+                    // If it's a plain array (like links/meta), just return it
+                    return $value;
+                }
             } else {
                 $value = $this->normalizeRenderable($value, $format, $context);
             }
