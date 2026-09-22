@@ -1,6 +1,6 @@
 {
   "name": "simple-online-healthcare/json-api-serializer",
-  "description": "Serialise Doctrine entities to JSON:API for Laravel 9.x",
+  "description": "Serialise Doctrine entities to JSON:API for Laravel 9.x and 10.x",
   "type": "library",
   "license": "proprietary",
   "authors": [
@@ -24,7 +24,7 @@
     }
   },
   "require": {
-    "laravel/framework": "^9.19",
+    "laravel/framework": "^9.19|^10.0",
     "simple-online-healthcare/contracts": "^1.5.0",
     "symfony/serializer": "^6.3",
     "symfony/property-access": "^6.3"
